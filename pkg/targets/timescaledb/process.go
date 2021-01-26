@@ -325,6 +325,7 @@ func (p *processor) ProcessBatch(b targets.Batch, doLoad bool) (uint64, uint64) 
 	batches.cnt = 0
 	return metricCnt, uint64(rowCnt)
 }
+
 func convertValsToSQLBasedOnType(values []string, types []string) []string {
 	return convertValsToBasedOnType(values, types, "'", "NULL")
 }

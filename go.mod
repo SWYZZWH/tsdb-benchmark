@@ -7,7 +7,9 @@ require (
 	github.com/SiriDB/go-siridb-connector v0.0.0-20190110105621-86b34c44c921
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
 	github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883
+	github.com/apache/thrift v0.13.0 // indirect
 	github.com/aws/aws-sdk-go v1.35.13
+	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/blagojts/viper v1.6.3-0.20200313094124-068f44cf5e69
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/go-ole/go-ole v1.2.4 // indirect
@@ -22,13 +24,18 @@ require (
 	github.com/kshvakov/clickhouse v1.3.11
 	github.com/lib/pq v1.3.0
 	github.com/pkg/errors v0.9.1
+	github.com/prometheus/client_golang v1.7.1 // indirect
+	github.com/prometheus/client_model v0.2.0 // indirect
 	github.com/prometheus/common v0.13.0
+	github.com/prometheus/procfs v0.1.3 // indirect
 	github.com/shirou/gopsutil v2.18.12+incompatible
+	github.com/spf13/cast v1.3.0
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/pflag v1.0.5
 	github.com/timescale/promscale v0.0.0-20201006153045-6a66a36f5c84
 	github.com/transceptor-technology/go-qpack v0.0.0-20190116123619-49a14b216a45
 	github.com/valyala/fasthttp v1.15.1
+	gitlab.alibaba-inc.com/monitor_service/kmonitor-client-go v0.0.0-20171020135547-8d812cb5fe4e
 	go.uber.org/atomic v1.6.0
 	golang.org/x/net v0.0.0-20200904194848-62affa334b73
 	golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e

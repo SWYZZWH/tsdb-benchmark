@@ -135,6 +135,8 @@ func (g *DataGenerator) getSerializer(sim common.Simulator, target targets.Imple
 		fallthrough
 	case constants.FormatTimescaleDB:
 		g.writeHeader(sim.Headers())
+	case constants.FormatKmon:
+		g.writeHeader(sim.Headers())
 	}
 	return target.Serializer(), nil
 }
@@ -167,4 +169,5 @@ func (g *DataGenerator) writeHeader(headers *common.GeneratedDataHeaders) {
 		g.bufOut.WriteString("\n")
 	}
 	g.bufOut.WriteString("\n")
+	g.bufOut.Flush()
 }

@@ -23,7 +23,7 @@ const serializerVersion uint64 = 1
 
 type void struct{}
 
-var supportedVersions = map[uint64]void{1: {}}
+var supportedVersions = map[uint64]void{31: {}}
 
 type Serializer struct {
 	headerWritten bool

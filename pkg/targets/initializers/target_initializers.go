@@ -9,6 +9,7 @@ import (
 	"github.com/timescale/tsbs/pkg/targets/constants"
 	"github.com/timescale/tsbs/pkg/targets/crate"
 	"github.com/timescale/tsbs/pkg/targets/influx"
+	"github.com/timescale/tsbs/pkg/targets/kmonitor"
 	"github.com/timescale/tsbs/pkg/targets/mongo"
 	"github.com/timescale/tsbs/pkg/targets/prometheus"
 	"github.com/timescale/tsbs/pkg/targets/siridb"
@@ -42,6 +43,8 @@ func GetTarget(format string) targets.ImplementedTarget {
 		return victoriametrics.NewTarget()
 	case constants.FormatTimestream:
 		return timestream.NewTarget()
+	case constants.FormatKmon:
+		return kmonitor.NewTarget()
 	}
 
 	supportedFormatsStr := strings.Join(constants.SupportedFormats(), ",")
