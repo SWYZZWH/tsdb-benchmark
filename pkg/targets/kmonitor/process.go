@@ -16,7 +16,7 @@ const (
 )
 
 func NewProcessor(bench *Benchmark) *processor {
-	return &processor{host: bench.opts.Host, port: bench.opts.Port, ds: bench.ds}
+	return &processor{host: bench.opts.Host, port: bench.opts.Port, ds: bench.ds, client: bench.client}
 }
 
 type processor struct {
@@ -27,27 +27,9 @@ type processor struct {
 }
 
 func (p processor) Init(int, bool, bool) {
-	//if p.client == nil{
-	//	fmt.Print("empty!")
-	//	tags := make(map[string]string)
-	//	config := Config{Address: p.host, Port: cast.ToInt(p.port), Service: kmon_go_service, GlobalTag: tags}
-	//	client, _ := NewClient(config)
-	//	//client.Init()
-	//	p.client = client
-	//}
 }
 
 func (p processor) ProcessBatch(b targets.Batch, _ bool) (uint64, uint64) {
-
-	if p.client == nil {
-		//fmt.Print("empty!")
-		tags := make(map[string]string)
-		config := Config{Address: p.host, Port: cast.ToInt(p.port), Service: kmon_go_service, GlobalTag: tags}
-		client, _ := NewClient(config)
-		client.Init()
-		p.client = client
-	}
-
 	arr := b.(*hypertableArr)
 	var metricCount uint64 = 0
 	var rowCount uint64 = 0
