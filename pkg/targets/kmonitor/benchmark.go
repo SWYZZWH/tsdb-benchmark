@@ -1,12 +1,10 @@
 package kmonitor
 
 import (
-	"fmt"
-	"github.com/spf13/cast"
 	"github.com/timescale/tsbs/internal/inputs"
 	"github.com/timescale/tsbs/pkg/data/source"
 	"github.com/timescale/tsbs/pkg/targets"
-	kmonitor_client_go "gitlab.alibaba-inc.com/monitor_service/kmonitor-client-go"
+	"gitlab.alibaba-inc.com/monitor_service/prometheus_client_golang/prometheus/kmonitor"
 	"sync"
 )
 
@@ -37,7 +35,7 @@ type Benchmark struct {
 	opts   *SpecificConfig
 	ds     targets.DataSource
 	pool   *sync.Pool
-	client *kmonitor_client_go.Client
+	client *kmonitor.Client
 }
 
 func (self *Benchmark) GetDataSource() targets.DataSource {
@@ -76,14 +74,6 @@ func (self *Benchmark) GetDBCreator() targets.DBCreator {
 	return nil
 }
 
-func (self *Benchmark) NewClient(client *kmonitor_client_go.Client) {
-	if client == nil {
-		fmt.Println("New Kmon-go-client...")
-		tags := make(map[string]string)
-		config := kmonitor_client_go.Config{Address: self.opts.Host, Port: cast.ToInt(self.opts.Host),
-			Service: kmon_go_service, GlobalTag: tags}
-		client, _ := kmonitor_client_go.NewClient(config)
-		client.Init()
-		self.client = client
-	}
+func (self *Benchmark) NewClient(client *kmonitor.Client) {
+
 }
