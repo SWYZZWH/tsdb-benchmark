@@ -45,6 +45,9 @@ func GetTarget(format string) targets.ImplementedTarget {
 		return timestream.NewTarget()
 	case constants.FormatKmon:
 		return kmonitor.NewTarget()
+	case constants.FormatOpenTelemetry:
+		return kmonitor.NewTarget()
+
 	}
 
 	supportedFormatsStr := strings.Join(constants.SupportedFormats(), ",")

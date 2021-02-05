@@ -15,7 +15,7 @@ require (
 	github.com/golang/protobuf v1.4.3
 	github.com/golang/snappy v0.0.1
 	github.com/google/flatbuffers v1.11.0
-	github.com/google/go-cmp v0.5.2
+	github.com/google/go-cmp v0.5.4
 	github.com/jackc/pgx/v4 v4.8.0
 	github.com/jmoiron/sqlx v1.2.1-0.20190826204134-d7d95172beb5
 	github.com/kshvakov/clickhouse v1.3.11
@@ -29,17 +29,18 @@ require (
 	github.com/timescale/promscale v0.0.0-20201006153045-6a66a36f5c84
 	github.com/transceptor-technology/go-qpack v0.0.0-20190116123619-49a14b216a45
 	github.com/valyala/fasthttp v1.15.1
-	gitlab.alibaba-inc.com/monitor_service/kmonitor-client-go v0.0.0-00010101000000-000000000000
 	//gitlab.alibaba-inc.com/monitor_service/prometheus-client-golang  v0.0.24
 	//gitlab.alibaba-inc.com/monitor_service/kmonitor-client-go v0.0.0-00010101000000-000000000000
 	gitlab.alibaba-inc.com/monitor_service/prometheus_client_golang v0.0.24
+	go.opentelemetry.io/otel v0.16.0
+	go.opentelemetry.io/otel/exporters/otlp v0.16.0
+	go.opentelemetry.io/otel/exporters/stdout v0.16.0 // indirect
+	go.opentelemetry.io/otel/sdk v0.16.0
 	//gitlab.alibaba-inc.com/monitor_service/kmonitor-client-go v0.0.0-20171020135547-8d812cb5fe4e
 	//gitlab.alibaba-inc.com/monitor_service/kmonitor-client-go v0.0.0-20171020135547-8d812cb5fe4e
 	go.uber.org/atomic v1.6.0
 	golang.org/x/net v0.0.0-20200904194848-62affa334b73
 	golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e
+	google.golang.org/grpc v1.34.0 // indirect
 	gopkg.in/yaml.v2 v2.3.0
 )
-
-//replace gitlab.alibaba-inc.com/monitor_service/prometheus-client-golang  => /Users/zwh/go/src/prometheus-client-golang
-replace gitlab.alibaba-inc.com/monitor_service/kmonitor-client-go => /Users/zwh/go/src/kmonitor-client-go

@@ -14,6 +14,7 @@ const (
 	FormatVictoriaMetrics = "victoriametrics"
 	FormatTimestream      = "timestream"
 	FormatKmon            = "kmon"
+	FormatOpenTelemetry   = "opentl"
 )
 
 func SupportedFormats() []string {
@@ -30,5 +31,6 @@ func SupportedFormats() []string {
 		FormatVictoriaMetrics,
 		FormatTimestream,
 		FormatKmon,
+		FormatOpenTelemetry,
 	}
 }
