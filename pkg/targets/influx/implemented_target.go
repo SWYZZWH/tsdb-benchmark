@@ -3,6 +3,7 @@ package influx
 import (
 	"github.com/blagojts/viper"
 	"github.com/spf13/pflag"
+	"github.com/timescale/tsbs/load"
 	"github.com/timescale/tsbs/pkg/data/serialize"
 	"github.com/timescale/tsbs/pkg/data/source"
 	"github.com/timescale/tsbs/pkg/targets"
@@ -33,6 +34,11 @@ func (t *influxTarget) Serializer() serialize.PointSerializer {
 	return &Serializer{}
 }
 
-func (t *influxTarget) Benchmark(string, *source.DataSourceConfig, *viper.Viper) (targets.Benchmark, error) {
-	panic("not implemented")
+func (t *influxTarget) Benchmark(s string, dsConfig *source.DataSourceConfig, viper *viper.Viper) (targets.Benchmark, error) {
+	config := load.BenchmarkRunnerConfig{}
+	config.AddToFlagSet(pflag.CommandLine)
+	t.TargetSpecificFlags("", pflag.CommandLine)
+	pflag.Parse()
+	//parseSpecificConfig(v)
+	return NewBenchmark(dsConfig)
 }
