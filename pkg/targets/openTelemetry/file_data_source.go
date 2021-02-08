@@ -14,8 +14,6 @@ var fatal = log.Fatalf
 
 const (
 	tagsKey = "tags"
-	//TimeValueIdx = "TIME-VALUE"
-	//ValueTimeIdx = "VALUE-TIME"
 )
 
 // for parsing header

@@ -11,6 +11,7 @@ import (
 	"github.com/timescale/tsbs/pkg/targets/influx"
 	"github.com/timescale/tsbs/pkg/targets/kmonitor"
 	"github.com/timescale/tsbs/pkg/targets/mongo"
+	open_telemetry "github.com/timescale/tsbs/pkg/targets/openTelemetry"
 	"github.com/timescale/tsbs/pkg/targets/prometheus"
 	"github.com/timescale/tsbs/pkg/targets/siridb"
 	"github.com/timescale/tsbs/pkg/targets/timescaledb"
@@ -46,7 +47,7 @@ func GetTarget(format string) targets.ImplementedTarget {
 	case constants.FormatKmon:
 		return kmonitor.NewTarget()
 	case constants.FormatOpenTelemetry:
-		return kmonitor.NewTarget()
+		return open_telemetry.NewTarget()
 
 	}
 

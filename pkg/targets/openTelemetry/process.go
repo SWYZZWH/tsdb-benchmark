@@ -14,6 +14,7 @@ import (
 	controller "go.opentelemetry.io/otel/sdk/metric/controller/basic"
 	proc "go.opentelemetry.io/otel/sdk/metric/processor/basic"
 	"go.opentelemetry.io/otel/sdk/metric/selector/simple"
+	"google.golang.org/grpc"
 	"log"
 	"strings"
 	"time"
@@ -32,7 +33,7 @@ type processor struct {
 	registerMap map[string]*metric.Float64ValueRecorder
 }
 
-func (p processor) Init(int, bool, bool) {
+func (p *processor) Init(int, bool, bool) {
 
 	fmt.Println("Open new OpenTelemetry-client...")
 
@@ -42,7 +43,7 @@ func (p processor) Init(int, bool, bool) {
 	driver := otlpgrpc.NewDriver(
 		otlpgrpc.WithInsecure(),
 		otlpgrpc.WithEndpoint(p.host+":"+p.port),
-		//otlpgrpc.WithDialOption(grpc.WithBlock()), // useful for testing
+		otlpgrpc.WithDialOption(grpc.WithBlock()), // useful for testing
 	)
 	exp, err := otlp.NewExporter(ctx, driver)
 	if err != nil {
@@ -62,10 +63,10 @@ func (p processor) Init(int, bool, bool) {
 		fmt.Println("Failed to start new controller!")
 	}
 	p.cont = cont
-
+	otel.SetMeterProvider(cont.MeterProvider())
 }
 
-func (p processor) Close() {
+func (p *processor) Close() {
 	cont := p.cont
 	err := cont.Stop(context.Background())
 	if err != nil {
@@ -73,15 +74,16 @@ func (p processor) Close() {
 	}
 }
 
-func (p processor) ProcessBatch(b targets.Batch, _ bool) (uint64, uint64) {
+func (p *processor) ProcessBatch(b targets.Batch, _ bool) (uint64, uint64) {
 	arr := b.(*hypertableArr)
 	var metricCount uint64 = 0
 	var rowCount uint64 = 0
 	fieldKeys := p.ds.Headers().FieldKeys
 	for metricName, rows := range arr.m {
 		fmt.Println("Sending...")
-		metricCount += p.sendRows(p.ctx, rows, fieldKeys, metricName)
-		rowCount += uint64(len(rows))
+		metricCountAdd, rowCountAdd := p.sendRows(rows, fieldKeys, metricName)
+		metricCount += metricCountAdd
+		rowCountAdd += rowCountAdd
 		fmt.Println("Sent!")
 	}
 
@@ -91,16 +93,15 @@ func (p processor) ProcessBatch(b targets.Batch, _ bool) (uint64, uint64) {
 	return metricCount, rowCount
 }
 
-func (p processor) sendRows(ctx *context.Context, rows []*insertData, fieldKeys map[string][]string, metricName string) uint64 {
-	var count uint64 = 0
+func (p *processor) sendRows(rows []*insertData, fieldKeys map[string][]string, metricName string) (uint64, uint64) {
+	var metricCount uint64 = 0
+	var rowCount uint64 = 0
 	for _, row := range rows {
 		// send point one by one directly
 		// use metric group to improve later
 		meter := otel.Meter("meter")
 		labels := transferTags(row.tags)
 		fields := strings.Split(row.fields, ",")
-
-		var count uint64 = 0
 
 		var valueRecorder metric.Float64ValueRecorder
 		if p.registerMap[metricName] == nil {
@@ -111,11 +112,13 @@ func (p processor) sendRows(ctx *context.Context, rows []*insertData, fieldKeys 
 		}
 
 		for i := range fieldKeys[metricName] {
-			valueRecorder.Record(*ctx, cast.ToFloat64(fields[i+1]), labels...)
-			count++
+			valueRecorder.Record(*p.ctx, cast.ToFloat64(fields[i+1]), labels...)
+			time.Sleep(50 * time.Microsecond)
+			metricCount++
 		}
+		rowCount++
 	}
-	return count
+	return metricCount, rowCount
 }
 
 func transferTags(tags string) []label.KeyValue {

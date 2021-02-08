@@ -7,7 +7,6 @@ import (
 	"io"
 )
 
-// Serializer writes a Point in a serialized form for TimescaleDB
 type Serializer struct{}
 
 // Serialize writes Point p to the given Writer w, so it can be
