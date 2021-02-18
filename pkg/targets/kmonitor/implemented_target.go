@@ -27,11 +27,11 @@ func (t *kmonTarget) Serializer() serialize.PointSerializer {
 func (t *kmonTarget) Benchmark(
 	_ string, dataSourceConfig *source.DataSourceConfig, v *viper.Viper,
 ) (targets.Benchmark, error) {
-	promSpecificConfig, err := parseSpecificConfig(v)
+	kmonSpecificConfig, err := parseSpecificConfig(v)
 	if err != nil {
 		return nil, err
 	}
-	return NewBenchmark(promSpecificConfig, dataSourceConfig)
+	return NewBenchmark(kmonSpecificConfig, dataSourceConfig)
 }
 
 func (t *kmonTarget) TargetSpecificFlags(flagPrefix string, flagSet *pflag.FlagSet) {

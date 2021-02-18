@@ -1,6 +1,7 @@
 package devops
 
 import (
+	"fmt"
 	"github.com/timescale/tsbs/pkg/data"
 	"github.com/timescale/tsbs/pkg/data/usecases/common"
 	"math"
@@ -36,6 +37,7 @@ func (c *GenericMetricsSimulatorConfig) NewSimulator(interval time.Duration, lim
 	if limit > 0 && limit < maxPoints {
 		maxPoints = limit
 	}
+	fmt.Printf("total points: %d\n", maxPoints)
 	dg := &GenericMetricsSimulator{
 		commonDevopsSimulator: &commonDevopsSimulator{
 			madePoints: 0,

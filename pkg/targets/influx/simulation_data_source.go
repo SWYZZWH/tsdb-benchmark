@@ -30,7 +30,6 @@ func (s simulationDataSource) NextItem() data.LoadedPoint {
 		p.Reset()
 	}
 	if s.simulator.Finished() || !write {
-		fatal("get next point nil")
 		return data.LoadedPoint{}
 	}
 

@@ -17,10 +17,19 @@ import (
 	"github.com/timescale/tsbs/pkg/targets"
 )
 
-func NewBenchmark(dsConfig *source.DataSourceConfig) (*benchmark, error) {
+//
+//func parseSpecificConfig(v *viper.Viper) (*SpecificConfig, error) {
+//	var conf SpecificConfig
+//	if err := v.Unmarshal(&conf); err != nil {
+//		return nil, err
+//	}
+//	return &conf, nil
+//}
+
+func NewBenchmark(dsConfig *source.DataSourceConfig, v *viper.Viper) (*benchmark, error) {
 	b := new(benchmark)
-	b.init()
 	b.dsConfig = dsConfig
+	b.init(v)
 	return b, nil
 }
 
@@ -44,6 +53,7 @@ var bufPool = sync.Pool{
 type benchmark struct {
 	loader load.BenchmarkRunner
 	config load.BenchmarkRunnerConfig
+	//specialConfig *SpecificConfig
 	//bufPool sync.Pool
 	//target  targets.ImplementedTarget
 
@@ -58,7 +68,7 @@ type benchmark struct {
 }
 
 // Parse args:
-func (b *benchmark) init() {
+func (b *benchmark) init(v *viper.Viper) {
 
 	err := utils.SetupConfigFile()
 	if err != nil {
@@ -67,24 +77,21 @@ func (b *benchmark) init() {
 	if err := viper.Unmarshal(&b.config); err != nil {
 		panic(fmt.Errorf("unable to decode config: %s", err))
 	}
-
-	csvDaemonURLs := viper.GetString("urls")
-	b.replicationFactor = viper.GetInt("replication-factor")
-	b.consistency = viper.GetString("consistency")
-	b.backoff = viper.GetDuration("backoff")
-	b.useGzip = viper.GetBool("gzip")
-
-	if _, ok := consistencyChoices[b.consistency]; !ok {
-		log.Fatalf("invalid consistency settings")
-	}
-
+	csvDaemonURLs := v.GetString("urls")
 	b.daemonURLs = strings.Split(csvDaemonURLs, ",")
 	if len(b.daemonURLs) == 0 {
 		log.Fatal("missing 'urls' flag")
 	}
+	b.backoff = v.GetDuration("backoff")
+	b.replicationFactor = v.GetInt("replication-factor")
+	b.useGzip = v.GetBool("gzip")
+	b.consistency = v.GetString("consistency")
+	if _, ok := consistencyChoices[b.consistency]; !ok {
+		log.Fatalf("invalid consistency settings")
+	}
+
 	b.config.HashWorkers = false
 	b.loader = load.GetBenchmarkRunner(b.config)
-
 }
 
 func (b *benchmark) GetDataSource() targets.DataSource {

@@ -29,7 +29,7 @@ require (
 	github.com/timescale/promscale v0.0.0-20201006153045-6a66a36f5c84
 	github.com/transceptor-technology/go-qpack v0.0.0-20190116123619-49a14b216a45
 	github.com/valyala/fasthttp v1.15.1
-	gitlab.alibaba-inc.com/monitor_service/kmonitor-client-go v0.0.0-00010101000000-000000000000 // indirect
+	//gitlab.alibaba-inc.com/monitor_service/kmonitor-client-go v0.0.0-00010101000000-000000000000 // indirect
 	//gitlab.alibaba-inc.com/monitor_service/prometheus-client-golang  v0.0.24
 	//gitlab.alibaba-inc.com/monitor_service/kmonitor-client-go v0.0.0-00010101000000-000000000000
 	gitlab.alibaba-inc.com/monitor_service/prometheus_client_golang v0.0.24
@@ -42,4 +42,4 @@ require (
 )
 
 //replace gitlab.alibaba-inc.com/monitor_service/prometheus-client-golang  => /Users/zwh/go/src/prometheus-client-golang
-replace gitlab.alibaba-inc.com/monitor_service/kmonitor-client-go => /Users/zwh/go/src/kmonitor-client-go
+//replace gitlab.alibaba-inc.com/monitor_service/kmonitor-client-go => /Users/zwh/go/src/kmonitor-client-go
