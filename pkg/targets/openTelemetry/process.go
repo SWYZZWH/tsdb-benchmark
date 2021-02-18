@@ -11,11 +11,15 @@ import (
 	"go.opentelemetry.io/otel/exporters/otlp/otlpgrpc"
 	"go.opentelemetry.io/otel/label"
 	"go.opentelemetry.io/otel/metric"
+	"go.opentelemetry.io/otel/propagation"
 	controller "go.opentelemetry.io/otel/sdk/metric/controller/basic"
 	proc "go.opentelemetry.io/otel/sdk/metric/processor/basic"
 	"go.opentelemetry.io/otel/sdk/metric/selector/simple"
+	sdktrace "go.opentelemetry.io/otel/sdk/trace"
+	"go.opentelemetry.io/otel/trace"
 	"google.golang.org/grpc"
 	"log"
+	"math"
 	"strings"
 	"time"
 )
@@ -25,12 +29,15 @@ func NewProcessor(bench *Benchmark) *processor {
 }
 
 type processor struct {
-	host        string
-	port        string
-	ds          targets.DataSource
-	cont        *controller.Controller
-	ctx         *context.Context
-	registerMap map[string]*metric.Float64ValueRecorder
+	host          string
+	port          string
+	ds            targets.DataSource
+	cont          *controller.Controller
+	ctx           *context.Context
+	registerMap   map[string]*metric.Float64ValueRecorder
+	traceProvider *sdktrace.TracerProvider
+	meter         metric.Meter
+	tracer        trace.Tracer
 }
 
 func (p *processor) Init(int, bool, bool) {
@@ -50,6 +57,10 @@ func (p *processor) Init(int, bool, bool) {
 		fmt.Println("Failed to start new exported!")
 	}
 
+	if err != nil {
+		fmt.Println("failed to create resource")
+	}
+
 	cont := controller.New(
 		proc.New(
 			simple.NewWithExactDistribution(),
@@ -58,12 +69,18 @@ func (p *processor) Init(int, bool, bool) {
 		controller.WithPusher(exp),
 		controller.WithCollectPeriod(2*time.Second),
 	)
+
+	otel.SetTextMapPropagator(propagation.TraceContext{})
+	otel.SetMeterProvider(cont.MeterProvider())
+
 	err = cont.Start(ctx)
 	if err != nil {
 		fmt.Println("Failed to start new controller!")
 	}
 	p.cont = cont
-	otel.SetMeterProvider(cont.MeterProvider())
+	p.meter = otel.Meter("meter")
+	p.tracer = otel.Tracer("test-tracer")
+
 }
 
 func (p *processor) Close() {
@@ -71,6 +88,10 @@ func (p *processor) Close() {
 	err := cont.Stop(context.Background())
 	if err != nil {
 		fmt.Println("Failed to close controller!")
+	}
+	err = p.traceProvider.Shutdown(*p.ctx)
+	if err != nil {
+		fmt.Println("Failed to close traceProvider!")
 	}
 }
 
@@ -96,26 +117,29 @@ func (p *processor) ProcessBatch(b targets.Batch, _ bool) (uint64, uint64) {
 func (p *processor) sendRows(rows []*insertData, fieldKeys map[string][]string, metricName string) (uint64, uint64) {
 	var metricCount uint64 = 0
 	var rowCount uint64 = 0
+
 	for _, row := range rows {
 		// send point one by one directly
 		// use metric group to improve later
-		meter := otel.Meter("meter")
+
 		labels := transferTags(row.tags)
 		fields := strings.Split(row.fields, ",")
 
-		var valueRecorder metric.Float64ValueRecorder
-		if p.registerMap[metricName] == nil {
-			valueRecorder = metric.Must(meter).NewFloat64ValueRecorder(metricName)
-			p.registerMap[metricName] = &valueRecorder
-		} else {
-			valueRecorder = *p.registerMap[metricName]
-		}
+		valueRecorder := metric.Must(p.meter).
+			NewFloat64Counter(
+				metricName,
+				metric.WithDescription(""),
+			).Bind(labels...)
 
 		for i := range fieldKeys[metricName] {
-			valueRecorder.Record(*p.ctx, cast.ToFloat64(fields[i+1]), labels...)
-			time.Sleep(50 * time.Microsecond)
+			//_, iSpan := p.tracer.Start(ctx, fmt.Sprintf("Sample-%d", i))
+			valueRecorder.Add(*p.ctx, math.Abs(cast.ToFloat64(fields[i+1])))
+			//time.Sleep(10 * time.Microsecond)
+			//iSpan.End()
 			metricCount++
 		}
+		//span.End()
+		valueRecorder.Unbind()
 		rowCount++
 	}
 	return metricCount, rowCount
