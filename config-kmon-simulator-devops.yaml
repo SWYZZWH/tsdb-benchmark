@@ -1,0 +1,32 @@
+data-source:
+  simulator:
+    debug: 0
+    initial-scale: "0"
+    log-interval: 10s
+    max-data-points: "0"
+    max-metric-count: "10"
+    scale: "4"
+    seed: 0
+    timestamp-end: "2021-01-27T11:58:00Z"
+    timestamp-start: "2021-01-27T11:57:00Z"
+    use-case: devops
+  type: SIMULATOR
+loader:
+  db-specific:
+    host: 11.158.130.157
+    port: 4141
+  runner:
+    batch-size: "10"
+    channel-capacity: "12"
+    db-name: benchmark
+    do-abort-on-exist: false
+    do-create-db: true
+    do-load: true
+    flow-control: false
+    hash-workers: false
+    insert-intervals: ""
+    limit: "0"
+    reporting-period: 10s
+    seed: 0
+    workers: "6"
+  target: kmon

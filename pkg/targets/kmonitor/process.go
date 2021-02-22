@@ -44,7 +44,6 @@ func (p processor) ProcessBatch(b targets.Batch, _ bool) (uint64, uint64) {
 	var rowCount uint64 = 0
 	fieldKeys := p.ds.Headers().FieldKeys
 	for metricName, rows := range arr.m {
-		fmt.Println("sending...")
 		matrix, count := transferRows2Points(rows, fieldKeys, metricName)
 		metricCount += count
 		rowCount += uint64(len(rows))
@@ -54,7 +53,6 @@ func (p processor) ProcessBatch(b targets.Batch, _ bool) (uint64, uint64) {
 		// points need to gather by tags
 		// now we just send points in a matrix one by one by single worker
 		p.sendMatrix(matrix)
-		fmt.Println("sended!")
 	}
 
 	//clear batch
