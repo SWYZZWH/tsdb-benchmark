@@ -16,8 +16,11 @@ import (
 	"google.golang.org/grpc"
 	"math"
 	"strings"
+	"sync"
 	"time"
 )
+
+var counter = 0
 
 func NewProcessor(bench *Benchmark) *processor {
 	return &processor{host: bench.opts.Host, port: bench.opts.Port, ds: bench.ds, registerMap: bench.registerMap}
@@ -29,7 +32,7 @@ type processor struct {
 	ds          targets.DataSource
 	cont        *controller.Controller
 	ctx         *context.Context
-	registerMap map[string]*metric.Float64ValueRecorder
+	registerMap *sync.Map //map[string]*metric.Float64ValueRecorder
 	meter       metric.Meter
 }
 
@@ -60,8 +63,8 @@ func (p *processor) Init(int, bool, bool) {
 			exp,
 		),
 		controller.WithPusher(exp),
-		controller.WithCollectPeriod(1000*time.Microsecond),
-		controller.WithPushTimeout(20*time.Second),
+		controller.WithCollectPeriod(50*time.Millisecond),
+		controller.WithPushTimeout(10*time.Second),
 	)
 	otel.SetMeterProvider(cont.MeterProvider())
 
@@ -108,15 +111,25 @@ func (p *processor) sendRows(rows []*insertData, fieldKeys map[string][]string, 
 		labels := transferTags(row.tags)
 		fields := strings.Split(row.fields, ",")
 
-		valueRecorder := metric.Must(p.meter).
-			NewFloat64ValueRecorder(
-				metricName,
-				metric.WithDescription(""),
-			)
+		valueRecorder, _ := p.registerMap.LoadOrStore(metricName,
+			metric.Must(p.meter).NewFloat64ValueRecorder(metricName, metric.WithDescription("")))
+
+		//valueRecorder2 := metric.Must(p.meter).
+		//	NewFloat64Counter(
+		//		metricName,
+		//		metric.WithDescription(""),
+		//	)
 
 		for i := range fieldKeys[metricName] {
-			valueRecorder.Record(*p.ctx, math.Abs(cast.ToFloat64(fields[i+1])), labels...)
+			//if counter > 1000000{
+			//	time.Sleep(20 * time.Second)
+			//	counter = 0
+			//}
+			valueRecorder.(metric.Float64ValueRecorder).Record(*p.ctx, math.Abs(cast.ToFloat64(fields[i+1])), labels...)
+			//valueRecorder2.Add(*p.ctx, math.Abs(cast.ToFloat64(fields[i+1])), labels...)
+			time.Sleep(10 * time.Microsecond)
 			metricCount++
+			counter++
 		}
 		rowCount++
 	}

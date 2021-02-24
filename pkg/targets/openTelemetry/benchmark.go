@@ -2,7 +2,6 @@ package open_telemetry
 
 import (
 	"github.com/timescale/tsbs/pkg/targets"
-	"go.opentelemetry.io/otel/metric"
 	"sync"
 )
 
@@ -11,7 +10,7 @@ type Benchmark struct {
 	opts        *SpecificConfig
 	ds          targets.DataSource
 	pool        *sync.Pool
-	registerMap map[string]*metric.Float64ValueRecorder // metrics should be registered before send, cache registered points
+	registerMap *sync.Map // type:[string]*metric.Float64ValueRecorder //metrics should be registered before send, cache registered points
 }
 
 func (self *Benchmark) GetDataSource() targets.DataSource {

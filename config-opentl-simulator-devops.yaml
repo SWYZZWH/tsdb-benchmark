@@ -5,9 +5,9 @@ data-source:
     log-interval: 10s
     max-data-points: "0"
     max-metric-count: "1000"
-    scale: "2000"
+    scale: "400"
     seed: 0
-    timestamp-end: "2020-01-10T00:00:00Z"
+    timestamp-end: "2020-02-10T00:00:00Z"
     timestamp-start: "2020-01-01T00:00:00Z"
     use-case: devops
   type: SIMULATOR
@@ -28,5 +28,5 @@ loader:
     limit: "0"
     reporting-period: 10s
     seed: 0
-    workers: "1"
+    workers: "12"
   target: opentl

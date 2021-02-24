@@ -1,10 +1,12 @@
 package kmonitor
 
 import (
+	"context"
 	"fmt"
 	"github.com/spf13/cast"
 	"github.com/timescale/tsbs/pkg/targets"
 	"gitlab.alibaba-inc.com/monitor_service/prometheus_client_golang/prometheus/kmonitor"
+	"golang.org/x/time/rate"
 	"log"
 	"strings"
 	"time"
@@ -25,14 +27,15 @@ func NewProcessor(bench *Benchmark) *processor {
 			GlobalTag: map[string]string{
 				"cluster": "na61"}})
 	client.Init()
-	return &processor{host: bench.opts.Host, port: bench.opts.Port, ds: bench.ds, client: client}
+	return &processor{host: bench.opts.Host, port: bench.opts.Port, ds: bench.ds, client: client, limiter: bench.limiter}
 }
 
 type processor struct {
-	host   string
-	port   string
-	ds     targets.DataSource
-	client *kmonitor.Client
+	host    string
+	port    string
+	ds      targets.DataSource
+	client  *kmonitor.Client
+	limiter *rate.Limiter
 }
 
 func (p processor) Init(int, bool, bool) {
@@ -52,6 +55,7 @@ func (p processor) ProcessBatch(b targets.Batch, _ bool) (uint64, uint64) {
 		// in fact, in order to take full advantage of bulk send ability for kmonitor client/agent
 		// points need to gather by tags
 		// now we just send points in a matrix one by one by single worker
+
 		p.sendMatrix(matrix)
 	}
 
@@ -63,7 +67,11 @@ func (p processor) ProcessBatch(b targets.Batch, _ bool) (uint64, uint64) {
 
 func (p processor) sendMatrix(matrix [][]*kmonitor.Point) {
 	for _, row := range matrix {
-		err := p.client.Send(row)
+		err := p.limiter.WaitN(context.Background(), len(row))
+		if err != nil {
+			log.Fatal(err.Error())
+		}
+		err = p.client.Send(row)
 		if err != nil {
 			log.Fatalln(err.Error())
 		}

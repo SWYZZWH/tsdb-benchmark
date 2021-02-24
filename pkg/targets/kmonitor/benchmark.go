@@ -5,6 +5,7 @@ import (
 	"github.com/timescale/tsbs/pkg/data/source"
 	"github.com/timescale/tsbs/pkg/targets"
 	"gitlab.alibaba-inc.com/monitor_service/prometheus_client_golang/prometheus/kmonitor"
+	"golang.org/x/time/rate"
 	"sync"
 )
 
@@ -23,19 +24,24 @@ func NewBenchmark(opts *SpecificConfig, dataSourceConfig *source.DataSourceConfi
 
 	newPool := &sync.Pool{New: func() interface{} { return &hypertableArr{} }}
 
+	//new qps limiter
+	limiter := rate.NewLimiter(rate.Limit(opts.Qps), opts.LimiterBucketSize)
+
 	return &Benchmark{
-		ds:   ds,
-		opts: opts,
-		pool: newPool,
+		ds:      ds,
+		opts:    opts,
+		pool:    newPool,
+		limiter: limiter,
 	}, nil
 }
 
 // Benchmark implements targets.Benchmark interface
 type Benchmark struct {
-	opts   *SpecificConfig
-	ds     targets.DataSource
-	pool   *sync.Pool
-	client *kmonitor.Client
+	opts    *SpecificConfig
+	ds      targets.DataSource
+	pool    *sync.Pool
+	client  *kmonitor.Client
+	limiter *rate.Limiter
 }
 
 func (self *Benchmark) GetDataSource() targets.DataSource {
@@ -65,15 +71,9 @@ func (self *Benchmark) GetPointIndexer(maxPartitions uint) targets.PointIndexer 
 }
 
 func (self *Benchmark) GetProcessor() targets.Processor {
-	//initialize kmon-go-client here
-	self.NewClient(self.client)
 	return NewProcessor(self)
 }
 
 func (self *Benchmark) GetDBCreator() targets.DBCreator {
 	return nil
-}
-
-func (self *Benchmark) NewClient(client *kmonitor.Client) {
-
 }

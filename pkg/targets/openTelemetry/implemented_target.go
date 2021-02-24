@@ -8,7 +8,6 @@ import (
 	"github.com/timescale/tsbs/pkg/data/source"
 	"github.com/timescale/tsbs/pkg/targets"
 	"github.com/timescale/tsbs/pkg/targets/constants"
-	"go.opentelemetry.io/otel/metric"
 	"sync"
 )
 
@@ -61,6 +60,6 @@ func NewBenchmark(opts *SpecificConfig, dataSourceConfig *source.DataSourceConfi
 		ds:          ds,
 		opts:        opts,
 		pool:        newPool,
-		registerMap: make(map[string]*metric.Float64ValueRecorder),
+		registerMap: new(sync.Map),
 	}, nil
 }
