@@ -29,14 +29,15 @@ require (
 	github.com/timescale/promscale v0.0.0-20201006153045-6a66a36f5c84
 	github.com/transceptor-technology/go-qpack v0.0.0-20190116123619-49a14b216a45
 	github.com/valyala/fasthttp v1.15.1
-	gitlab.alibaba-inc.com/monitor_service/prometheus_client_golang v0.0.24
-	go.opentelemetry.io/otel v0.16.0
-	go.opentelemetry.io/otel/exporters/otlp v0.16.0
+	gitlab.alibaba-inc.com/monitor_service/prometheus_client_golang v0.0.25-0.20210225044417-b5ffcf59326f
+	go.opentelemetry.io/otel v0.17.0 // indirect
+	go.opentelemetry.io/otel/exporters/otlp v0.17.0 // indirect
 	go.opentelemetry.io/otel/exporters/stdout v0.16.0 // indirect
-	go.opentelemetry.io/otel/sdk v0.16.0
+	go.opentelemetry.io/otel/metric v0.17.0 // indirect
+	go.opentelemetry.io/otel/sdk/metric v0.17.0 // indirect
 	go.uber.org/atomic v1.6.0
-	golang.org/x/net v0.0.0-20200904194848-62affa334b73
+	golang.org/x/net v0.0.0-20201021035429-f5854403a974
 	golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e
-	google.golang.org/grpc v1.34.0
+	google.golang.org/grpc v1.35.0 // indirect
 	gopkg.in/yaml.v2 v2.3.0
 )

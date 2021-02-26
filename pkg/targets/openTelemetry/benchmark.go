@@ -1,16 +1,45 @@
 package open_telemetry
 
 import (
+	"github.com/timescale/tsbs/internal/inputs"
+	"github.com/timescale/tsbs/pkg/data/source"
 	"github.com/timescale/tsbs/pkg/targets"
-	"sync"
+	"gitlab.alibaba-inc.com/monitor_service/prometheus_client_golang/prometheus/otel"
+	"golang.org/x/time/rate"
 )
+
+func NewBenchmark(opts *SpecificConfig, dataSourceConfig *source.DataSourceConfig) (targets.Benchmark, error) {
+	var ds targets.DataSource
+	if dataSourceConfig.Type == source.FileDataSourceType {
+		ds = newFileDataSource(dataSourceConfig.File.Location)
+	} else {
+		dataGenerator := &inputs.DataGenerator{}
+		simulator, err := dataGenerator.CreateSimulator(dataSourceConfig.Simulator)
+		if err != nil {
+			return nil, err
+		}
+		ds = newSimulationDataSource(simulator)
+	}
+
+	//new qps limiter
+	var limiter *rate.Limiter = nil
+	if opts.UseQpsLimiter {
+		limiter = rate.NewLimiter(rate.Limit(opts.LimiterMaxQps), opts.LimiterBucketSize)
+	}
+
+	return &Benchmark{
+		ds:      ds,
+		opts:    opts,
+		limiter: limiter,
+	}, nil
+}
 
 // Benchmark implements targets.Benchmark interface
 type Benchmark struct {
-	opts        *SpecificConfig
-	ds          targets.DataSource
-	pool        *sync.Pool
-	registerMap *sync.Map // type:[string]*metric.Float64ValueRecorder //metrics should be registered before send, cache registered points
+	opts    *SpecificConfig
+	ds      targets.DataSource
+	client  *otel.Client
+	limiter *rate.Limiter
 }
 
 func (self *Benchmark) GetDataSource() targets.DataSource {

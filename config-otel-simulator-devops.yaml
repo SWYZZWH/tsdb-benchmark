@@ -4,8 +4,8 @@ data-source:
     initial-scale: "0"
     log-interval: 10s
     max-data-points: "0"
-    max-metric-count: "1000"
-    scale: "400"
+    max-metric-count: "10"
+    scale: "4000"
     seed: 0
     timestamp-end: "2020-02-10T00:00:00Z"
     timestamp-start: "2020-01-01T00:00:00Z"
@@ -15,9 +15,12 @@ loader:
   db-specific:
     host: "localhost"
     port: "55680"
+    use-qps-limiter: true
+    limiter-max-qps: 400000
+    limiter-bucket-size: 1200
   runner:
-    batch-size: "10000"
-    channel-capacity: "0"
+    batch-size: "1000"
+    channel-capacity: "12"
     db-name: benchmark
     do-abort-on-exist: false
     do-create-db: true

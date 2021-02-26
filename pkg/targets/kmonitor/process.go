@@ -21,9 +21,10 @@ func NewProcessor(bench *Benchmark) *processor {
 	fmt.Println("New Kmon-go-client...")
 	client := kmonitor.NewClient(
 		&kmonitor.Config{
-			Address: bench.opts.Host,
-			Port:    bench.opts.Port,
-			Service: kmon_go_service,
+			Address:   bench.opts.Host,
+			Port:      bench.opts.Port,
+			Service:   kmon_go_service,
+			BatchSize: bench.opts.SendBatchSize,
 			GlobalTag: map[string]string{
 				"cluster": "na61"}})
 	client.Init()
@@ -67,11 +68,14 @@ func (p processor) ProcessBatch(b targets.Batch, _ bool) (uint64, uint64) {
 
 func (p processor) sendMatrix(matrix [][]*kmonitor.Point) {
 	for _, row := range matrix {
-		err := p.limiter.WaitN(context.Background(), len(row))
-		if err != nil {
-			log.Fatal(err.Error())
+		if p.limiter != nil {
+			err := p.limiter.WaitN(context.Background(), len(row))
+			if err != nil {
+				log.Fatal(err.Error())
+			}
 		}
-		err = p.client.Send(row)
+
+		err := p.client.Send(row)
 		if err != nil {
 			log.Fatalln(err.Error())
 		}

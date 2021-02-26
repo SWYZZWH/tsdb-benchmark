@@ -24,8 +24,10 @@ func NewBenchmark(opts *SpecificConfig, dataSourceConfig *source.DataSourceConfi
 
 	newPool := &sync.Pool{New: func() interface{} { return &hypertableArr{} }}
 
-	//new qps limiter
-	limiter := rate.NewLimiter(rate.Limit(opts.Qps), opts.LimiterBucketSize)
+	var limiter *rate.Limiter = nil
+	if opts.UseQpsLimiter {
+		limiter = rate.NewLimiter(rate.Limit(opts.LimiterMaxQps), opts.LimiterBucketSize)
+	}
 
 	return &Benchmark{
 		ds:      ds,
@@ -47,16 +49,6 @@ type Benchmark struct {
 func (self *Benchmark) GetDataSource() targets.DataSource {
 	return self.ds
 }
-
-//type BatchFactory struct {
-//	batchPool *sync.Pool
-//}
-//
-//func (self *BatchFactory) New() targets.Batch {
-//	arr := self.batchPool.Get().(*hypertableArr)
-//
-//	return arr
-//}
 
 func (self *Benchmark) GetBatchFactory() targets.BatchFactory {
 	//return &BatchFactory{batchPool:self.pool}

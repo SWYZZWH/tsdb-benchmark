@@ -35,10 +35,10 @@ func (t *kmonTarget) Benchmark(
 }
 
 func (t *kmonTarget) TargetSpecificFlags(flagPrefix string, flagSet *pflag.FlagSet) {
-	//flagSet.String(flagPrefix+"adapter-write-url", "http://localhost:9201/write", "kmon adapter url to send data to")
-	//flagSet.Bool(flagPrefix+"use-current-time", false, "Whether to replace the simulated timestamp with the current timestamp")
 	flagSet.String(flagPrefix+"host", "10.101.193.170", "Hostname of daily Kmon agent.")
 	flagSet.String(flagPrefix+"port", "4848", "Port of daily Kmon agent.")
-	flagSet.Float64(flagPrefix+"qps", 5000*1000, "Limit max qps.")
+	flagSet.Int(flagPrefix+"send-batch-size", 1000, "batch size flume agent")
+	flagSet.Bool(flagPrefix+"use-qps-limiter", false, "Limit max qps.")
+	flagSet.Float64(flagPrefix+"limiter-max-qps", 5000*1000, "Limit max qps.")
 	flagSet.Int(flagPrefix+"limiter-bucket-size", 1000, "qps limiter param, default is 1000")
 }

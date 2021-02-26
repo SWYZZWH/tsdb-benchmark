@@ -86,7 +86,7 @@ github.com/gocql/gocql
 github.com/gocql/gocql/internal/lru
 github.com/gocql/gocql/internal/murmur
 github.com/gocql/gocql/internal/streams
-# github.com/gogo/protobuf v1.3.1
+# github.com/gogo/protobuf v1.3.2
 github.com/gogo/protobuf/gogoproto
 github.com/gogo/protobuf/proto
 github.com/gogo/protobuf/protoc-gen-gogo/descriptor
@@ -251,69 +251,56 @@ github.com/valyala/bytebufferpool
 github.com/valyala/fasthttp
 github.com/valyala/fasthttp/fasthttputil
 github.com/valyala/fasthttp/stackless
-# gitlab.alibaba-inc.com/monitor_service/prometheus_client_golang v0.0.24
+# gitlab.alibaba-inc.com/monitor_service/prometheus_client_golang v0.0.25-0.20210225044417-b5ffcf59326f
 ## explicit
 gitlab.alibaba-inc.com/monitor_service/prometheus_client_golang/prometheus
 gitlab.alibaba-inc.com/monitor_service/prometheus_client_golang/prometheus/flume
 gitlab.alibaba-inc.com/monitor_service/prometheus_client_golang/prometheus/internal
 gitlab.alibaba-inc.com/monitor_service/prometheus_client_golang/prometheus/kmonitor
-# go.opentelemetry.io/otel v0.16.0
+gitlab.alibaba-inc.com/monitor_service/prometheus_client_golang/prometheus/otel
+gitlab.alibaba-inc.com/monitor_service/prometheus_client_golang/prometheus/otel/opentelemetry-proto-gen/collector/metrics/v1
+gitlab.alibaba-inc.com/monitor_service/prometheus_client_golang/prometheus/otel/opentelemetry-proto-gen/common/v1
+gitlab.alibaba-inc.com/monitor_service/prometheus_client_golang/prometheus/otel/opentelemetry-proto-gen/metrics/v1
+gitlab.alibaba-inc.com/monitor_service/prometheus_client_golang/prometheus/otel/opentelemetry-proto-gen/resource/v1
+# go.opentelemetry.io/otel v0.17.0
 ## explicit
 go.opentelemetry.io/otel
 go.opentelemetry.io/otel/codes
 go.opentelemetry.io/otel/internal
 go.opentelemetry.io/otel/internal/baggage
 go.opentelemetry.io/otel/internal/global
-go.opentelemetry.io/otel/internal/metric
 go.opentelemetry.io/otel/internal/trace/noop
-go.opentelemetry.io/otel/internal/trace/parent
 go.opentelemetry.io/otel/label
+go.opentelemetry.io/otel/propagation
+go.opentelemetry.io/otel/semconv
+go.opentelemetry.io/otel/unit
+# go.opentelemetry.io/otel/exporters/otlp v0.17.0
+## explicit
+go.opentelemetry.io/otel/exporters/otlp
+# go.opentelemetry.io/otel/exporters/stdout v0.16.0
+## explicit
+# go.opentelemetry.io/otel/metric v0.17.0
+## explicit
 go.opentelemetry.io/otel/metric
 go.opentelemetry.io/otel/metric/number
 go.opentelemetry.io/otel/metric/registry
-go.opentelemetry.io/otel/propagation
-go.opentelemetry.io/otel/semconv
-go.opentelemetry.io/otel/trace
-go.opentelemetry.io/otel/unit
-# go.opentelemetry.io/otel/exporters/otlp v0.16.0
-## explicit
-go.opentelemetry.io/otel/exporters/otlp
-go.opentelemetry.io/otel/exporters/otlp/internal/opentelemetry-proto-gen/collector/metrics/v1
-go.opentelemetry.io/otel/exporters/otlp/internal/opentelemetry-proto-gen/collector/trace/v1
-go.opentelemetry.io/otel/exporters/otlp/internal/opentelemetry-proto-gen/common/v1
-go.opentelemetry.io/otel/exporters/otlp/internal/opentelemetry-proto-gen/metrics/v1
-go.opentelemetry.io/otel/exporters/otlp/internal/opentelemetry-proto-gen/resource/v1
-go.opentelemetry.io/otel/exporters/otlp/internal/opentelemetry-proto-gen/trace/v1
-go.opentelemetry.io/otel/exporters/otlp/internal/transform
-go.opentelemetry.io/otel/exporters/otlp/otlpgrpc
-# go.opentelemetry.io/otel/exporters/stdout v0.16.0
-## explicit
-# go.opentelemetry.io/otel/sdk v0.16.0
-## explicit
-go.opentelemetry.io/otel/sdk/export/metric
-go.opentelemetry.io/otel/sdk/export/metric/aggregation
+# go.opentelemetry.io/otel/sdk v0.17.0
 go.opentelemetry.io/otel/sdk/export/trace
 go.opentelemetry.io/otel/sdk/instrumentation
-go.opentelemetry.io/otel/sdk/internal
-go.opentelemetry.io/otel/sdk/metric
-go.opentelemetry.io/otel/sdk/metric/aggregator
-go.opentelemetry.io/otel/sdk/metric/aggregator/exact
-go.opentelemetry.io/otel/sdk/metric/aggregator/histogram
-go.opentelemetry.io/otel/sdk/metric/aggregator/lastvalue
-go.opentelemetry.io/otel/sdk/metric/aggregator/minmaxsumcount
-go.opentelemetry.io/otel/sdk/metric/aggregator/sum
-go.opentelemetry.io/otel/sdk/metric/controller/basic
-go.opentelemetry.io/otel/sdk/metric/controller/time
-go.opentelemetry.io/otel/sdk/metric/processor/basic
-go.opentelemetry.io/otel/sdk/metric/selector/simple
 go.opentelemetry.io/otel/sdk/resource
-go.opentelemetry.io/otel/sdk/trace
+# go.opentelemetry.io/otel/sdk/export/metric v0.17.0
+go.opentelemetry.io/otel/sdk/export/metric
+go.opentelemetry.io/otel/sdk/export/metric/aggregation
+# go.opentelemetry.io/otel/sdk/metric v0.17.0
+## explicit
+# go.opentelemetry.io/otel/trace v0.17.0
+go.opentelemetry.io/otel/trace
 # go.uber.org/atomic v1.6.0
 ## explicit
 go.uber.org/atomic
 # golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
 golang.org/x/crypto/pbkdf2
-# golang.org/x/net v0.0.0-20200904194848-62affa334b73
+# golang.org/x/net v0.0.0-20201021035429-f5854403a974
 ## explicit
 golang.org/x/net/http/httpguts
 golang.org/x/net/http2
@@ -321,7 +308,7 @@ golang.org/x/net/http2/hpack
 golang.org/x/net/idna
 golang.org/x/net/internal/timeseries
 golang.org/x/net/trace
-# golang.org/x/sys v0.0.0-20200908134130-d2e65c121b96
+# golang.org/x/sys v0.0.0-20200930185726-fdedc70b468f
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
 golang.org/x/sys/windows
@@ -352,7 +339,7 @@ google.golang.org/genproto/googleapis/api/annotations
 google.golang.org/genproto/googleapis/api/httpbody
 google.golang.org/genproto/googleapis/rpc/status
 google.golang.org/genproto/protobuf/field_mask
-# google.golang.org/grpc v1.34.0
+# google.golang.org/grpc v1.35.0
 ## explicit
 google.golang.org/grpc
 google.golang.org/grpc/attributes
@@ -380,6 +367,7 @@ google.golang.org/grpc/internal/grpclog
 google.golang.org/grpc/internal/grpcrand
 google.golang.org/grpc/internal/grpcsync
 google.golang.org/grpc/internal/grpcutil
+google.golang.org/grpc/internal/metadata
 google.golang.org/grpc/internal/resolver
 google.golang.org/grpc/internal/resolver/dns
 google.golang.org/grpc/internal/resolver/passthrough
