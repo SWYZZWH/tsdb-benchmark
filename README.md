@@ -137,6 +137,12 @@ loader:
     	batch-size: "1000"
   ```
 
+### 获取压测结果
+otel/kmon agent
+- 见大盘
+
+prometheus pull mode
+- http://localhost:port/metrics port在配置文件中配置
 
 
 ### 支持的 target
@@ -145,6 +151,7 @@ loader:
 
 - <span id = "agent">kmon </span>
 - otel
+- prometheus pull mode
 
 #### database
 

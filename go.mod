@@ -21,6 +21,7 @@ require (
 	github.com/kshvakov/clickhouse v1.3.11
 	github.com/lib/pq v1.3.0
 	github.com/pkg/errors v0.9.1
+	github.com/prometheus/client_golang v1.7.1
 	github.com/prometheus/common v0.15.0
 	github.com/shirou/gopsutil v2.18.12+incompatible
 	github.com/spf13/cast v1.3.0

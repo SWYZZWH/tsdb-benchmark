@@ -12,6 +12,7 @@ import (
 	"github.com/timescale/tsbs/pkg/targets/kmonitor"
 	"github.com/timescale/tsbs/pkg/targets/mongo"
 	open_telemetry "github.com/timescale/tsbs/pkg/targets/openTelemetry"
+	prom_pull "github.com/timescale/tsbs/pkg/targets/promPull"
 	"github.com/timescale/tsbs/pkg/targets/prometheus"
 	"github.com/timescale/tsbs/pkg/targets/siridb"
 	"github.com/timescale/tsbs/pkg/targets/timescaledb"
@@ -48,7 +49,8 @@ func GetTarget(format string) targets.ImplementedTarget {
 		return kmonitor.NewTarget()
 	case constants.FormatOpenTelemetry:
 		return open_telemetry.NewTarget()
-
+	case constants.FormatPromPull:
+		return prom_pull.NewTarget()
 	}
 
 	supportedFormatsStr := strings.Join(constants.SupportedFormats(), ",")

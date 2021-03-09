@@ -139,6 +139,8 @@ func (g *DataGenerator) getSerializer(sim common.Simulator, target targets.Imple
 		g.writeHeader(sim.Headers())
 	case constants.FormatOpenTelemetry:
 		g.writeHeader(sim.Headers())
+	case constants.FormatPromPull:
+		g.writeHeader(sim.Headers())
 	}
 	return target.Serializer(), nil
 }

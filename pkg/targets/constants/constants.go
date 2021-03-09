@@ -15,6 +15,7 @@ const (
 	FormatTimestream      = "timestream"
 	FormatKmon            = "kmon"
 	FormatOpenTelemetry   = "otel"
+	FormatPromPull        = "prom-pull"
 )
 
 func SupportedFormats() []string {
@@ -32,5 +33,6 @@ func SupportedFormats() []string {
 		FormatTimestream,
 		FormatKmon,
 		FormatOpenTelemetry,
+		FormatPromPull,
 	}
 }
