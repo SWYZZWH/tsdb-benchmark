@@ -39,7 +39,7 @@ env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o benchmark_linux ./cmd/tsbs
 根目录下自带了配置文件 `config-kmon-simulator-devops.yaml` 和 `config-otel-simulator-devops.yaml`，可直接修改使用
 
 ```bash
-./benchmark load kmon --config=./config-kmon-simulator-devops.yaml
+./benchmark load kmon --config=./config-kmon-simulator.yaml
 ```
 
 ```bash

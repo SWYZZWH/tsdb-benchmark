@@ -5,7 +5,7 @@ data-source:
     log-interval: 10s
     max-data-points: "0"
     max-metric-count: "10"
-    scale: "4000"
+    scale: "400"
     seed: 0
     timestamp-end: "2020-02-10T00:00:00Z"
     timestamp-start: "2020-01-01T00:00:00Z"
@@ -14,7 +14,7 @@ data-source:
 loader:
   db-specific:
     host: "localhost"
-    port: "55680"
+    port: "8111"
     use-qps-limiter: true
     limiter-max-qps: 400000
     limiter-bucket-size: 1200
@@ -31,5 +31,5 @@ loader:
     limit: "0"
     reporting-period: 10s
     seed: 0
-    workers: "12"
+    workers: "2"
   target: opentl

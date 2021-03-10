@@ -1,0 +1,23 @@
+data-source:
+  file:
+    location: /tmp/timescaledb-data
+  type: FILE
+loader:
+  db-specific:
+    host: 11.158.132.186
+    port: "4141"
+  runner:
+    batch-size: "100"
+    channel-capacity: "0"
+    db-name: benchmark
+    do-abort-on-exist: false
+    do-create-db: true
+    do-load: true
+    flow-control: false
+    hash-workers: false
+    insert-intervals: ""
+    limit: "0"
+    reporting-period: 10s
+    seed: 0
+    workers: "1"
+  target: kmon
