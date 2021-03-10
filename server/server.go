@@ -24,13 +24,13 @@ const (
 )
 
 const (
-	defaultUsecase     = "devops"
-	defaultDataSource  = "simulator"
-	configPath         = "./config/"
-	binPath            = "./bin/"
-	defaultdConfigName = "config.yaml"
-	defaultExeName     = "benchmark_macos"
-	defaultLogFile     = "./log.txt"
+	defaultUsecase    = "devops"
+	defaultDataSource = "simulator"
+	configPath        = "./config/"
+	binPath           = "./bin/"
+	defaultConfigPath = "./config.yaml"
+	defaultExeName    = "benchmark"
+	defaultLogFile    = "./log.txt"
 )
 
 var (
@@ -54,13 +54,13 @@ type Benchmark struct {
 	configFileName string
 }
 
-func (b Benchmark) init() {
+func (b *Benchmark) init() {
 	b.mu.Lock()
 	b.state = Stopped
 	b.mu.Unlock()
 }
 
-func (b Benchmark) reset() {
+func (b *Benchmark) reset() {
 	b.mu.Lock()
 	b.state = Stopped
 	b.cmd = nil
@@ -77,6 +77,7 @@ func getConfigFile(v *viper.Viper, db string, ds string) (string, error) {
 	if _, ok := err.(viper.ConfigFileNotFoundError); ok {
 		configFileDir := configPath + strings.Join([]string{configFileName, "yaml"}, ".")
 		err = createConfigFile(configFileDir, db, ds)
+		err = v.ReadInConfig()
 	}
 	if err != nil {
 		return "", errors.New(fmt.Sprintf("Can't get config file %s", configFileName))
@@ -88,13 +89,13 @@ func getConfigFile(v *viper.Viper, db string, ds string) (string, error) {
 func createConfigFile(configFileName, db, ds string) error {
 	// multi-thread risk ...
 	defaultConfigFile.mu.Lock()
-	args := []string{"config", "--target=" + db, "--data-source=" + ds}
+	args := []string{"config", "--target=" + db, "--data-source=" + strings.ToUpper(ds)}
 	configCmd := exec.Command(binPath+defaultExeName, args...)
 	_, err := configCmd.CombinedOutput()
 	if err != nil {
 		return err
 	}
-	err = os.Rename(defaultConfigFile.FileName, configFileName)
+	err = os.Rename(defaultConfigPath, configFileName)
 	defaultConfigFile.mu.Unlock()
 	return err
 }
@@ -119,21 +120,16 @@ func copyAndCreateConfigFile(configFileName string, configType string) (string, 
 	defer dest.Close()
 
 	//This will copy
-	bytesWritten, err := io.Copy(dest, src)
+	_, err = io.Copy(dest, src)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("Bytes Written: %d\n", bytesWritten)
 
 	return newConfigFileDir, err
 }
 
 func getConfigName(db string, ds string) string {
-	return strings.Join([]string{"config", db, ds}, "-")
-}
-
-func resetBechmark(benchmark *Benchmark) {
-	benchmark.reset()
+	return strings.Join([]string{"config", db, strings.ToLower(ds)}, "-")
 }
 
 func runBenchmark(db, configFileName string, benchmark *Benchmark) error {
@@ -149,20 +145,16 @@ func runBenchmark(db, configFileName string, benchmark *Benchmark) error {
 	if benchmark == nil {
 		return errors.New("get global benchmark failed")
 	}
-	success := atomic.CompareAndSwapInt32(&benchmark.state, Stopped, Running)
-	if !success {
-		_ = f.Close()
-		return errors.New("other benchmark is running; use /stop api to close the running benchmark")
-	}
 	benchmark.cmd = loadCmd
 	benchmark.configFileName = configFileName
 
 	go func() {
 		loadCmd.Stdout, loadCmd.Stderr = f, f
 		_ = loadCmd.Run()
+		_ = f.Close()
+		err = os.Remove(benchmark.configFileName)
+		benchmark.reset()
 	}()
-	defer resetBechmark(benchmark)
-
 	return nil
 }
 
@@ -200,7 +192,6 @@ func parseStartParams(c *gin.Context, dbSpecificMap map[string]string) (map[stri
 	if workers := c.Query("workers"); workers != "" {
 		if workersNum, err := strconv.Atoi(workers); err != nil || workersNum <= 0 {
 			return nil, errors.New("double check param: workers")
-			//c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("invalid param: %s", workers)})
 		} else {
 			queryParamsMap["workers"] = workers
 		}
@@ -229,8 +220,8 @@ func overrideViperByQueryParams(v *viper.Viper, paramsMap map[string]interface{}
 	loaderViper := v.GetStringMap("loader")
 	runnerViper := loaderViper["runner"].(map[string]interface{})
 
-	if paramsMap["use-case"] != nil {
-		simulatorViper["use-case"] = paramsMap["use-case"].(string)
+	if paramsMap["usecase"] != nil {
+		simulatorViper["use-case"] = paramsMap["usecase"].(string)
 	}
 	if paramsMap["workers"] != nil {
 		runnerViper["workers"] = paramsMap["workers"].(string)
@@ -255,6 +246,19 @@ func overrideViperByQueryParams(v *viper.Viper, paramsMap map[string]interface{}
 }
 
 func startHandler(c *gin.Context) {
+
+	b, isExist := c.Get("benchmark")
+	if !isExist {
+		c.JSON(http.StatusInternalServerError, "get global benchmark failed due to unknown reason")
+		return
+	}
+	benchmark := b.(*Benchmark)
+
+	if !atomic.CompareAndSwapInt32(&benchmark.state, Stopped, Running) { // carry out only one benchmark at the same time
+		c.JSON(http.StatusServiceUnavailable, "another benchmark is running, use /stop api to shutdown first")
+		return
+	}
+
 	v := viper.New()
 	//dbSpecificViper := v.GetStringMap("data-source")["db-specific"].(map[string]string)
 	paramsMap, err := parseStartParams(c, nil)
@@ -268,19 +272,12 @@ func startHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
+	v.SetConfigFile(configFileName)
 	err = overrideViperByQueryParams(v, paramsMap)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
-
-	b, isExist := c.Get("benchmark")
-	if !isExist {
-		c.JSON(http.StatusInternalServerError, "get global benchmark failed due to unknown reason")
-		return
-	}
-	benchmark := b.(*Benchmark)
 
 	err = runBenchmark(paramsMap["db"].(string), configFileName, benchmark)
 	if err != nil {
@@ -292,6 +289,7 @@ func startHandler(c *gin.Context) {
 }
 
 func stopHandler(c *gin.Context) {
+	errInfo := ""
 	b, isExist := c.Get("benchmark")
 	if !isExist {
 		c.JSON(http.StatusInternalServerError, "get global benchmark failed due to unknown reason")
@@ -303,19 +301,22 @@ func stopHandler(c *gin.Context) {
 		return
 	}
 
+	err := os.Remove(benchmark.configFileName)
+	if err != nil {
+		errInfo += "fail to clean config file;"
+	}
+
 	if benchmark.state == Stopped {
-		c.JSON(http.StatusOK, "benchmark is stopped now, use /start api to run new benchmark")
+		c.JSON(http.StatusOK, errInfo+"benchmark is stopped now, use /start api to run new benchmark")
 		return
 	}
 
-	err := benchmark.cmd.Process.Kill()
+	err = benchmark.cmd.Process.Kill()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, "benchmark shutdown has failed, please shutdown manually")
+		c.JSON(http.StatusInternalServerError, errInfo+"benchmark shutdown has failed, please shutdown manually;")
+		return
 	}
-	err = os.Remove(benchmark.configFileName)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, "fail to clean config file")
-	}
+
 	atomic.CompareAndSwapInt32(&benchmark.state, Running, Stopped) //if failed, means already stopped
 	c.JSON(http.StatusOK, "benchmark has been shutdown successfully")
 }
