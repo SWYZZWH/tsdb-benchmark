@@ -6,7 +6,6 @@ import (
 	"io"
 )
 
-// Serializer writes a Point in a serialized form for MongoDB
 type Serializer struct{}
 
 // Serialize writes Point data to the given writer, conforming to the

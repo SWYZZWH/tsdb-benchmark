@@ -283,7 +283,6 @@ func (l *CommonBenchmarkRunner) report(period time.Duration) {
 	prevTime := start
 	prevColCount := uint64(0)
 	prevRowCount := uint64(0)
-
 	printFn("time,per. metric/s,metric total,overall metric/s,per. row/s,row total,overall row/s\n")
 	for now := range time.NewTicker(period).C {
 		cCount := atomic.LoadUint64(&l.metricCnt)

@@ -1,6 +1,7 @@
 package devops
 
 import (
+	"fmt"
 	"github.com/timescale/tsbs/pkg/data"
 	"github.com/timescale/tsbs/pkg/data/usecases/common"
 	"time"
@@ -57,6 +58,7 @@ func (c *CPUOnlySimulatorConfig) NewSimulator(interval time.Duration, limit uint
 		// Set specified points number limit
 		maxPoints = limit
 	}
+	fmt.Printf("total points: %d\n", maxPoints)
 	sim := &CPUOnlySimulator{&commonDevopsSimulator{
 		madePoints: 0,
 		maxPoints:  maxPoints,

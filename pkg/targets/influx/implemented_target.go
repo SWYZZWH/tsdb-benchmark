@@ -3,6 +3,7 @@ package influx
 import (
 	"github.com/blagojts/viper"
 	"github.com/spf13/pflag"
+	"github.com/timescale/tsbs/load"
 	"github.com/timescale/tsbs/pkg/data/serialize"
 	"github.com/timescale/tsbs/pkg/data/source"
 	"github.com/timescale/tsbs/pkg/targets"
@@ -18,11 +19,20 @@ type influxTarget struct {
 }
 
 func (t *influxTarget) TargetSpecificFlags(flagPrefix string, flagSet *pflag.FlagSet) {
-	flagSet.String(flagPrefix+"urls", "http://localhost:8086", "InfluxDB URLs, comma-separated. Will be used in a round-robin fashion.")
+	//flagSet.String(flagPrefix+"urls", "http://localhost:8086", "InfluxDB URLs, comma-separated. Will be used in a round-robin fashion.")
+	flagSet.String(flagPrefix+"urls", "", "InfluxDB URLs, comma-separated. Will be used in a round-robin fashion.")
 	flagSet.Int(flagPrefix+"replication-factor", 1, "Cluster replication factor (only applies to clustered databases).")
 	flagSet.String(flagPrefix+"consistency", "all", "Write consistency. Must be one of: any, one, quorum, all.")
 	flagSet.Duration(flagPrefix+"backoff", time.Second, "Time to sleep between requests when server indicates backpressure is needed.")
 	flagSet.Bool(flagPrefix+"gzip", true, "Whether to gzip encode requests (default true).")
+}
+
+type SpecificConfig struct {
+	urls               string        `yaml:"urls" mapstructure:"urls"`
+	replication_factor int           `yaml:"replication-factor" mapstructure:"replication-factor"`
+	consistency        string        `yaml:"consistency" mapstructure:"consistency"`
+	backoff            time.Duration `yaml:"backoff" mapstructure:"backoff"`
+	gzip               bool          `yaml:"gzip" mapstructure:"gzip"`
 }
 
 func (t *influxTarget) TargetName() string {
@@ -33,6 +43,14 @@ func (t *influxTarget) Serializer() serialize.PointSerializer {
 	return &Serializer{}
 }
 
-func (t *influxTarget) Benchmark(string, *source.DataSourceConfig, *viper.Viper) (targets.Benchmark, error) {
-	panic("not implemented")
+func (t *influxTarget) Benchmark(s string, dsConfig *source.DataSourceConfig, viper *viper.Viper) (targets.Benchmark, error) {
+	config := load.BenchmarkRunnerConfig{}
+	config.AddToFlagSet(pflag.CommandLine)
+	t.TargetSpecificFlags("", pflag.CommandLine)
+
+	//influxSpecificConfig, err := parseSpecificConfig(viper)
+	//if err != nil {
+	//	return nil, err
+	//}
+	return NewBenchmark(dsConfig, viper)
 }
