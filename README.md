@@ -291,3 +291,8 @@ curl "http://localhost:8888/log.txt"
 
 也可以直接查看 `./log.txt`
 
+#### 清理报告
+```bash
+curl -X DELETE "http://localhost:8888/log"
+```
+
