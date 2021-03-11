@@ -1,11 +1,28 @@
 **目前支持[裸工具版本](#tsbs)与[http服务版本](#tsbs-server)**
 
+[TOC]
+
+
+## 支持的 target
+
+### <span id="support-agent">agent</span>
+
+- <span id = "agent">kmon </span>
+- otel
+- prometheus pull mode
+
+### database
+
+- timescaledb
+- influxdb
+- prometheus
+
 
 ## <span id="tsbs">tsbs 使用手册</span>
 
 ### 简介
 
-压测工具，目前[支持的target](#support-target)
+时序数据库压测工具
 
 原项目文档见 **https://github.com/timescale/tsbs**
 
@@ -198,10 +215,10 @@ go build -o ./bin/server ./server
 #### 运行
 
 ```bash
-./bin/server
+./bin/server -p=8888
 ```
 
-将监听8888端口
+可指定端口，默认监听 8888 端口
 
 
 
@@ -271,16 +288,3 @@ curl "http://localhost:8888/start?db=prom-pull&workers=2&scale=8&timestamp-end=9
 
 接口开发中，目前可以直接查看 `./log.txt`
 
-## 支持的 target
-
-### <span id="support-target">agent</span>
-
-- <span id = "agent">kmon </span>
-- otel
-- prometheus pull mode
-
-### database
-
-- timescaledb
-- influxdb
-- prometheus

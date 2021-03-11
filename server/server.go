@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -366,10 +367,16 @@ func GetBenchmark(benchmark *Benchmark) gin.HandlerFunc {
 }
 
 func main() {
+
+	// gloabal vars initialize
 	benchmark := new(Benchmark)
 	benchmark.init()
 
 	defaultConfigFile = new(DefaultConfigFile)
+
+	//parse command line params
+	port := flag.Int("p", 8888, "server listen at this port")
+	flag.Parse()
 
 	r := gin.New()
 	r.Use(gin.Logger(), gin.Recovery(), GetBenchmark(benchmark))
@@ -377,5 +384,5 @@ func main() {
 	r.GET("/start", startHandler)
 	r.GET("/stop", stopHandler)
 	//r.GET("/result", resultHanlder)
-	_ = r.Run(":8888")
+	_ = r.Run(":" + strconv.Itoa(*port))
 }
