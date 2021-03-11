@@ -14,8 +14,8 @@ data-source:
 loader:
   db-specific:
     host: "localhost"
-    port: "8111"
-    use-qps-limiter: true
+    port: "55680"
+    use-qps-limiter: false
     limiter-max-qps: 400000
     limiter-bucket-size: 1200
   runner:

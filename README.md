@@ -1,8 +1,11 @@
-# tsbs 使用手册
+**目前支持[裸工具版本](#tsbs)与[http服务版本](#tsbs-server)**
+
+
+## <span id="tsbs">tsbs 使用手册</span>
 
 ### 简介
 
-agent 的压测工具，目前[支持的agent](#support-agent)
+压测工具，目前[支持的target](#support-target)
 
 原项目文档见 **https://github.com/timescale/tsbs**
 
@@ -103,11 +106,11 @@ loader:
     limiter-bucket-size: 1200
 ```
 
-`use-qps-limiter` 表示是否启用固定压力模式，默认不开启，即尽发送端最大能力发送数据，尽可能测出 qps 上限
+`use-qps-limiter` 表示是否启用固定压力模式，默认不开启，即尽发送端最大能力发送数据，尽可能测出 qps 上限
 
 `limiter-max-qps` 当启用固定压力模式时才有意义，指定固定压力的大小
 
-`limiter-bucket-size` <font color='red'> 当测试 kmon 时，应该保证至少为 50，当测试 otel 时，应该保证至少为 batch-size(见下) </font>，否则测试可能失败
+`limiter-bucket-size` <font color='red'> 当测试 kmon 时，应该保证至少为 50，当测试 otel 时，应该保证至少为 batch-size(见下) </font>，否则测试可能失败
 
 **注意**：一般情况下，实际压力与设定值的差异不超过5%，但当 limiter-bucket-size 较大，或设定的压力接近发送端的能力上限时，可能差异会较大。另外，由于分批发送，当设定压力小而批较大时，差异也会比较大
 
@@ -137,27 +140,18 @@ loader:
     	batch-size: "1000"
   ```
 
+
+
 ### 获取压测结果
+
 otel/kmon agent
+
 - 见大盘
 
 prometheus pull mode
+
 - http://localhost:port/metrics port在配置文件中配置
 
-
-### 支持的 target
-
-#### <span id="support-agent">agent</span>
-
-- <span id = "agent">kmon </span>
-- otel
-- prometheus pull mode
-
-#### database
-
-- timescaledb
-- influxdb
-- prometheus
 
 
 
@@ -165,3 +159,128 @@ prometheus pull mode
 
 见[大盘](https://kmonitor2.alibaba-inc.com/d/cQuSzOsGk/agent-xing-neng-ce-shi?orgId=1&from=1614325694797&to=1614329084797)
 
+
+
+
+
+## <span id="tsbs-server">tsbs-server 使用手册</span>
+
+### 简介
+
+tsbs 压测工具的http服务版，支持使用 RESTful apis 启停压测，配置压测参数，查看报告
+
+
+
+### 手动构建
+
+#### 获取源码
+
+```bash
+git clone git@gitlab.alibaba-inc.com:monitor_service/tsdb_benchmark.git
+git checkout http-service
+cd tsdb_benchmark
+```
+
+#### 提前配置好 go env
+
+```bash
+export GOPROXY=https://goproxy.io && export GOPRIVATE=gitlab.alibaba-inc.com
+ && export GONOPROXY=gitlab.alibaba-inc.com && export GONOSUMDB=gitlab.alibaba-inc.com
+```
+
+#### 编译 tsbs 与 server
+
+```bash
+go build -o ./bin/benchmark ./cmd/tsbs_load
+go build -o ./bin/server ./server
+```
+
+#### 运行
+
+```bash
+./bin/server
+```
+
+将监听8888端口
+
+
+
+### docker
+
+```bash
+docker build -t tsbs-server-0.1 .
+```
+
+运行时注意暴露端口
+
+
+
+### API
+
+#### 启动
+
+```bash
+curl "http://localhost:8888/start?db=prom-pull"
+```
+
+启动默认参数配置的压测，压测 target 为 prom-pull，默认配置文件此时为 `./config/config-prom-pull-simulator.yaml`
+
+为保证不会相互干扰，同时只能运行一个压测程序，如果有一个压测程序正在运行，会返回：
+
+> "another benchmark is running, use /stop api to shutdown first"
+
+某些参数配置错误时，不会报错，但压测也不会启动，可以连续启动几次压测，如果不报上述错误，说明参数配置错误，或压测时间过短
+
+
+
+#### 停止
+
+```bash
+curl "http://localhost:8888/stop"
+```
+
+
+
+#### 压测参数
+
+以下几个参数适用于所有 target
+
+- db (压测target)【必填】不填将报错
+- workers (制造压力的线程数)【选填】
+- scale(数据线数目) 【选填】
+- timestamp-end(控制压测的持续时间/影响总的点数)【选填】**不表示压测结束的时间！**一般情况下可以设置尽可能的大，如9999-01-02T00:00:00Z
+- usecase(压测场景/测试用例) 【选填】一般不要填，使用默认的devops场景就可以
+
+不同 target 可以有特定参数，以otel为例
+
+- host (otel collector的ip)【选填】
+- port (otel collector的端口)【选填】
+- use-qps-limiter (是否使用固定压力模式)【选填】true/false
+- limiter-max-qps (固定压力大小)【选填】float64
+- limiter-bucket-size (固定压力下的桶大小) 一般不需要设置
+
+**示例**
+
+```bash
+curl "http://localhost:8888/start?db=prom-pull&workers=2&scale=8&timestamp-end=9999-01-02T00:00:00Z&port=8111"
+```
+
+
+
+#### 查看报告
+
+接口开发中，目前可以直接查看 `./log.txt`
+
+## 支持的 target
+
+### <span id="support-target">agent</span>
+
+- <span id = "agent">kmon </span>
+- otel
+- prometheus pull mode
+
+### database
+
+- timescaledb
+- influxdb
+- prometheus

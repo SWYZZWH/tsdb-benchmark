@@ -37,6 +37,7 @@ var (
 	usesAvailable       = map[string]bool{"devops": true, "iot": true}
 	dataSourceAvailable = map[string]bool{"simulator": true, "file": false}
 	dbAvailable         = map[string]bool{"kmon": true, "otel": true, "influx": true, "timescale": true, "prometheus": true, "prom-pull": true}
+	sharedParams        = map[string]bool{"db": true, "ds": true, "usecase": true, "workers": true, "scale": true, "timestamp-end": true}
 )
 
 type DefaultConfigFile struct {
@@ -169,7 +170,8 @@ func parseStartParams(c *gin.Context, dbSpecificMap map[string]string) (map[stri
 		queryParamsMap["db"] = db
 	}
 
-	ds := c.Query("ds") //data-source
+	//ds for data source
+	ds := c.Query("ds")
 	if ds == "" {
 		queryParamsMap["ds"] = defaultDataSource
 	} else if !dataSourceAvailable[ds] {
@@ -182,9 +184,7 @@ func parseStartParams(c *gin.Context, dbSpecificMap map[string]string) (map[stri
 	if usecase == "" {
 		usecase = defaultUsecase
 	} else if !usesAvailable[usecase] {
-		//c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("invalid param: %s", usecase)})
 		return nil, errors.New("double check param: usecase")
-		//return errors.New(fmt.Sprintf("invalid param: %s", usecase))
 	} else {
 		queryParamsMap["usecase"] = usecase
 	}
@@ -200,7 +200,6 @@ func parseStartParams(c *gin.Context, dbSpecificMap map[string]string) (map[stri
 	if scale := c.Query("scale"); scale != "" {
 		if scaleNum, err := strconv.Atoi(scale); err != nil || scaleNum <= 0 {
 			return nil, errors.New("double check param: scale")
-			//c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("invalid param: %s", scale)})
 		} else {
 			queryParamsMap["scale"] = scale
 		}
@@ -208,6 +207,14 @@ func parseStartParams(c *gin.Context, dbSpecificMap map[string]string) (map[stri
 
 	if timestampEnd := c.Query("timestamp-end"); timestampEnd != "" {
 		queryParamsMap["timestamp-end"] = timestampEnd
+	}
+
+	//without checking
+	qMap := c.Request.URL.Query()
+	for k, v := range qMap {
+		if _, ok := sharedParams[k]; !ok {
+			queryParamsMap[k] = v[0]
+		}
 	}
 
 	return queryParamsMap, nil
@@ -219,19 +226,50 @@ func overrideViperByQueryParams(v *viper.Viper, paramsMap map[string]interface{}
 	simulatorViper := dataSourceViper["simulator"].(map[string]interface{})
 	loaderViper := v.GetStringMap("loader")
 	runnerViper := loaderViper["runner"].(map[string]interface{})
+	dbSpecficViper := loaderViper["db-specific"].(map[string]interface{})
 
-	if paramsMap["usecase"] != nil {
-		simulatorViper["use-case"] = paramsMap["usecase"].(string)
+	// shared configs
+	if val, ok := paramsMap["usecase"]; ok {
+		simulatorViper["use-case"] = val.(string)
 	}
-	if paramsMap["workers"] != nil {
-		runnerViper["workers"] = paramsMap["workers"].(string)
+	if val, ok := paramsMap["workers"]; ok {
+		runnerViper["workers"] = val.(string)
 	}
-	if paramsMap["scale"] != nil {
-		simulatorViper["scale"] = paramsMap["scale"].(string)
+	if val, ok := paramsMap["scale"]; ok {
+		simulatorViper["scale"] = val.(string)
 	}
-	if paramsMap["timestamp-end"] != nil {
-		simulatorViper["timestamp-end"] = paramsMap["timestamp-end"].(string)
+	if val, ok := paramsMap["timestamp-end"]; ok {
+		simulatorViper["timestamp-end"] = val.(string)
 	}
+
+	// db-specific configs
+	for k, val := range paramsMap {
+		if _, ok := dbSpecficViper[k]; ok {
+			dbSpecficViper[k] = val
+		}
+	}
+
+	//if paramsMap["host"] != nil && dbSpecficViper["host"] != nil{
+	//	dbSpecficViper["host"] = paramsMap["host"].(string)
+	//}
+	//if paramsMap["port"] != nil && dbSpecficViper["port"] != nil{
+	//	dbSpecficViper["port"] = paramsMap["port"].(string)
+	//}
+	//if paramsMap["use-qps-limiter"] != nil && dbSpecficViper["use-qps-limiter"] != nil{
+	//	dbSpecficViper["use-qps-limiter"] = paramsMap["use-qps-limiter"].(bool)
+	//}
+	//if paramsMap["limiter-bucket-size"] != nil && dbSpecficViper["limiter-bucket-size"] != nil{
+	//	dbSpecficViper["limiter-bucket-size"] = paramsMap["limiter-bucket-size"].(int)
+	//}
+	//if paramsMap["limiter-max-qps"] != nil && dbSpecficViper["limiter-max-qps"] != nil {
+	//	dbSpecficViper["limiter-max-qps"] = paramsMap["limiter-max-qps"].(float64)
+	//}
+	//if paramsMap["send-batch-size"] != nil && dbSpecficViper["send-batch-size"] != nil{
+	//	dbSpecficViper["send-batch-size"] = paramsMap["send-batch-size"].(int)
+	//}
+	//if paramsMap["urls"] != nil && dbSpecficViper["urls"] != nil{
+	//	dbSpecficViper["urls"] = paramsMap["urls"].(string)
+	//}
 
 	// parse dbspecific params
 	v.Set("data-source", dataSourceViper)
@@ -260,7 +298,6 @@ func startHandler(c *gin.Context) {
 	}
 
 	v := viper.New()
-	//dbSpecificViper := v.GetStringMap("data-source")["db-specific"].(map[string]string)
 	paramsMap, err := parseStartParams(c, nil)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
