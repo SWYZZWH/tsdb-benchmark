@@ -250,28 +250,6 @@ func overrideViperByQueryParams(v *viper.Viper, paramsMap map[string]interface{}
 		}
 	}
 
-	//if paramsMap["host"] != nil && dbSpecficViper["host"] != nil{
-	//	dbSpecficViper["host"] = paramsMap["host"].(string)
-	//}
-	//if paramsMap["port"] != nil && dbSpecficViper["port"] != nil{
-	//	dbSpecficViper["port"] = paramsMap["port"].(string)
-	//}
-	//if paramsMap["use-qps-limiter"] != nil && dbSpecficViper["use-qps-limiter"] != nil{
-	//	dbSpecficViper["use-qps-limiter"] = paramsMap["use-qps-limiter"].(bool)
-	//}
-	//if paramsMap["limiter-bucket-size"] != nil && dbSpecficViper["limiter-bucket-size"] != nil{
-	//	dbSpecficViper["limiter-bucket-size"] = paramsMap["limiter-bucket-size"].(int)
-	//}
-	//if paramsMap["limiter-max-qps"] != nil && dbSpecficViper["limiter-max-qps"] != nil {
-	//	dbSpecficViper["limiter-max-qps"] = paramsMap["limiter-max-qps"].(float64)
-	//}
-	//if paramsMap["send-batch-size"] != nil && dbSpecficViper["send-batch-size"] != nil{
-	//	dbSpecficViper["send-batch-size"] = paramsMap["send-batch-size"].(int)
-	//}
-	//if paramsMap["urls"] != nil && dbSpecficViper["urls"] != nil{
-	//	dbSpecficViper["urls"] = paramsMap["urls"].(string)
-	//}
-
 	// parse dbspecific params
 	v.Set("data-source", dataSourceViper)
 	v.Set("loader", loaderViper)
@@ -366,6 +344,27 @@ func GetBenchmark(benchmark *Benchmark) gin.HandlerFunc {
 	}
 }
 
+func deleteLogHandler(c *gin.Context) {
+	b, isExist := c.Get("benchmark")
+	if !isExist {
+		c.JSON(http.StatusInternalServerError, "get global benchmark failed due to unknown reason")
+		return
+	}
+	benchmark := b.(*Benchmark)
+
+	if benchmark.state == Running {
+		c.JSON(http.StatusServiceUnavailable, "benchmark is running, use /stop api to shutdown first")
+		return
+	}
+
+	// multi-thread risk
+	_ = os.Remove(defaultLogFile)
+	_, _ = os.Create(defaultLogFile)
+
+	c.JSON(http.StatusServiceUnavailable, "log has been cleaned!")
+	return
+}
+
 func main() {
 
 	// gloabal vars initialize
@@ -383,6 +382,8 @@ func main() {
 
 	r.GET("/start", startHandler)
 	r.GET("/stop", stopHandler)
-	//r.GET("/result", resultHanlder)
+	r.StaticFS("/files", http.Dir("./"))
+	r.StaticFile("/log.txt", defaultLogFile)
+	r.DELETE("/log", deleteLogHandler)
 	_ = r.Run(":" + strconv.Itoa(*port))
 }

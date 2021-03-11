@@ -285,6 +285,9 @@ curl "http://localhost:8888/start?db=prom-pull&workers=2&scale=8&timestamp-end=9
 
 
 #### 查看报告
+```bash
+curl "http://localhost:8888/log.txt"
+```
 
-接口开发中，目前可以直接查看 `./log.txt`
+也可以直接查看 `./log.txt`
 
