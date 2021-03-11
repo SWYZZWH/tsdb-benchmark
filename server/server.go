@@ -46,7 +46,6 @@ type DefaultConfigFile struct {
 
 var defaultConfigFile *DefaultConfigFile
 
-// need to add lock
 type Benchmark struct {
 	mu             sync.Mutex
 	state          int32
@@ -87,7 +86,6 @@ func getConfigFile(v *viper.Viper, db string, ds string) (string, error) {
 }
 
 func createConfigFile(configFileName, db, ds string) error {
-	// multi-thread risk ...
 	defaultConfigFile.mu.Lock()
 	args := []string{"config", "--target=" + db, "--data-source=" + strings.ToUpper(ds)}
 	configCmd := exec.Command(binPath+defaultExeName, args...)
@@ -137,7 +135,9 @@ func runBenchmark(db, configFileName string, benchmark *Benchmark) error {
 	args := []string{"load", db, "--config=" + configFileName}
 	loadCmd := exec.Command(binPath+defaultExeName, args...)
 
-	f, err := os.OpenFile(defaultLogFile, os.O_RDWR|os.O_CREATE, 0755)
+	f, err := os.OpenFile(defaultLogFile, os.O_APPEND|os.O_RDWR|os.O_CREATE, 0755)
+	f.WriteString(fmt.Sprintf("\nstart benchmark at time: %v\n", time.Now()))
+
 	if err != nil {
 		return errors.New("can't open or create log file")
 	}
