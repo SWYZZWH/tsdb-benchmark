@@ -19,8 +19,10 @@ type influxTarget struct {
 }
 
 func (t *influxTarget) TargetSpecificFlags(flagPrefix string, flagSet *pflag.FlagSet) {
-	//flagSet.String(flagPrefix+"urls", "http://localhost:8086", "InfluxDB URLs, comma-separated. Will be used in a round-robin fashion.")
-	flagSet.String(flagPrefix+"urls", "", "InfluxDB URLs, comma-separated. Will be used in a round-robin fashion.")
+	flagSet.String(flagPrefix+"urls", "http://localhost:8086", "InfluxDB URLs, comma-separated. Will be used in a round-robin fashion.")
+	flagSet.Bool(flagPrefix+"use-qps-limiter", false, "Use qps limiter or not.")
+	flagSet.Float64(flagPrefix+"limiter-max-qps", 5000*1000, "Limit max qps.")
+	flagSet.Int(flagPrefix+"limiter-bucket-size", 1000, "qps limiter param, default is 1000")
 	flagSet.Int(flagPrefix+"replication-factor", 1, "Cluster replication factor (only applies to clustered databases).")
 	flagSet.String(flagPrefix+"consistency", "all", "Write consistency. Must be one of: any, one, quorum, all.")
 	flagSet.Duration(flagPrefix+"backoff", time.Second, "Time to sleep between requests when server indicates backpressure is needed.")
@@ -28,11 +30,14 @@ func (t *influxTarget) TargetSpecificFlags(flagPrefix string, flagSet *pflag.Fla
 }
 
 type SpecificConfig struct {
-	urls               string        `yaml:"urls" mapstructure:"urls"`
-	replication_factor int           `yaml:"replication-factor" mapstructure:"replication-factor"`
-	consistency        string        `yaml:"consistency" mapstructure:"consistency"`
-	backoff            time.Duration `yaml:"backoff" mapstructure:"backoff"`
-	gzip               bool          `yaml:"gzip" mapstructure:"gzip"`
+	urls                string        `yaml:"urls" mapstructure:"urls"`
+	replication_factor  int           `yaml:"replication-factor" mapstructure:"replication-factor"`
+	consistency         string        `yaml:"consistency" mapstructure:"consistency"`
+	backoff             time.Duration `yaml:"backoff" mapstructure:"backoff"`
+	gzip                bool          `yaml:"gzip" mapstructure:"gzip"`
+	use_qps_limiter     bool          `yaml:"use-qps-limiter" mapstructure:"use-qps-limiter"`
+	limiter_max_qps     float64       `yaml:"limiter-max-qps" mapstructure:"limiter-max-qps"`
+	limiter_bucket_size int           `yaml:"limiter-bucket-size" mapstructure:"limiter-Bucket-size"`
 }
 
 func (t *influxTarget) TargetName() string {

@@ -18,8 +18,11 @@ loader:
     gzip: true
     replication-factor: 1
     urls: http://localhost:8086
+    use-qps-limiter: false
+    limiter-max-qps: 400000
+    limiter-bucket-size: 100000
   runner:
-    batch-size: "10000"
+    batch-size: "1000"
     channel-capacity: "0"
     db-name: benchmark
     do-abort-on-exist: false

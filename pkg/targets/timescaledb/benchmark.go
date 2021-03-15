@@ -4,6 +4,7 @@ import (
 	"github.com/timescale/tsbs/internal/inputs"
 	"github.com/timescale/tsbs/pkg/data/source"
 	"github.com/timescale/tsbs/pkg/targets"
+	"golang.org/x/time/rate"
 )
 
 const pgxDriver = "pgx"
@@ -22,17 +23,25 @@ func NewBenchmark(dbName string, opts *LoadingOptions, dataSourceConfig *source.
 		ds = newSimulationDataSource(simulator)
 	}
 
+	//new qps limiter
+	var limiter *rate.Limiter = nil
+	if opts.UseQpsLimiter {
+		limiter = rate.NewLimiter(rate.Limit(opts.LimiterMaxQps), opts.LimiterBucketSize)
+	}
+
 	return &benchmark{
-		opts:   opts,
-		ds:     ds,
-		dbName: dbName,
+		opts:    opts,
+		ds:      ds,
+		dbName:  dbName,
+		limiter: limiter,
 	}, nil
 }
 
 type benchmark struct {
-	opts   *LoadingOptions
-	ds     targets.DataSource
-	dbName string
+	opts    *LoadingOptions
+	ds      targets.DataSource
+	limiter *rate.Limiter
+	dbName  string
 }
 
 func (b *benchmark) GetDataSource() targets.DataSource {
@@ -51,7 +60,7 @@ func (b *benchmark) GetPointIndexer(maxPartitions uint) targets.PointIndexer {
 }
 
 func (b *benchmark) GetProcessor() targets.Processor {
-	return newProcessor(b.opts, getDriver(b.opts.ForceTextFormat), b.dbName)
+	return newProcessor(b.opts, getDriver(b.opts.ForceTextFormat), b.dbName, b.limiter)
 }
 
 func (b *benchmark) GetDBCreator() targets.DBCreator {

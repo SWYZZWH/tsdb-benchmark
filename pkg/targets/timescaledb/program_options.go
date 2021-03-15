@@ -9,6 +9,10 @@ import (
 
 // Loading option vars:
 type LoadingOptions struct {
+	UseQpsLimiter     bool    `yaml:"use-qps-limiter" mapstructure:"use-qps-limiter"`
+	LimiterMaxQps     float64 `yaml:"limiter-max-qps" mapstructure:"limiter-max-qps"`
+	LimiterBucketSize int     `yaml:"limiter-bucket-size" mapstructure:"limiter-Bucket-size"`
+
 	PostgresConnect string `yaml:"postgres" mapstructure:"postgres"`
 	Host            string `yaml:"host"`
 	User            string

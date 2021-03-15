@@ -33,6 +33,9 @@ func (t *prometheusTarget) Benchmark(_ string, dataSourceConfig *source.DataSour
 }
 
 func (t *prometheusTarget) TargetSpecificFlags(flagPrefix string, flagSet *pflag.FlagSet) {
-	flagSet.String(flagPrefix+"adapter-write-url", "http://localhost:9201/write", "Prometheus adapter url to send data to")
+	flagSet.String(flagPrefix+"adapter-write-url", "http://localhost:9090/write", "Prometheus adapter url to send data to")
 	flagSet.Bool(flagPrefix+"use-current-time", false, "Whether to replace the simulated timestamp with the current timestamp")
+	flagSet.Bool(flagPrefix+"use-qps-limiter", false, "Use qps limiter or not.")
+	flagSet.Float64(flagPrefix+"limiter-max-qps", 5000*1000, "Limit max qps.")
+	flagSet.Int(flagPrefix+"limiter-bucket-size", 1000, "qps limiter param, default is 1000")
 }

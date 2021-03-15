@@ -17,7 +17,7 @@ loader:
     port: "55680"
     use-qps-limiter: false
     limiter-max-qps: 400000
-    limiter-bucket-size: 1200
+    limiter-bucket-size: 100000
   runner:
     batch-size: "1000"
     channel-capacity: "12"

@@ -2,9 +2,11 @@ package influx
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"github.com/timescale/tsbs/load"
 	"github.com/timescale/tsbs/pkg/targets"
+	"golang.org/x/time/rate"
 	"time"
 
 	"github.com/valyala/fasthttp"
@@ -24,6 +26,7 @@ type processor struct {
 	backingOffChan chan bool
 	backingOffDone chan struct{}
 	httpWriter     *HTTPWriter
+	limiter        *rate.Limiter
 }
 
 // influxdb support multi-worker streess
@@ -58,6 +61,12 @@ func (p *processor) ProcessBatch(b targets.Batch, doLoad bool) (uint64, uint64) 
 	if doLoad {
 		var err error
 		for {
+			// qps limiter
+			err = p.limiter.WaitN(context.Background(), int(batch.metrics))
+			if err != nil {
+				fatal("Error waitN: %s\n", err.Error())
+			}
+
 			if p.useGzip {
 				compressedBatch := bufPool.Get().(*bytes.Buffer)
 				_, _ = fasthttp.WriteGzip(compressedBatch, batch.buf.Bytes())

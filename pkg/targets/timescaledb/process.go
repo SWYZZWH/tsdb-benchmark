@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/timescale/tsbs/pkg/targets"
+	"golang.org/x/time/rate"
 	"os"
 	"strconv"
 	"strings"
@@ -184,6 +185,12 @@ func (p *processor) processCSI(hypertable string, rows []*insertData) uint64 {
 	}
 	tagRows, dataRows, numMetrics := p.splitTagsAndMetrics(rows, colLen)
 
+	err := p.limiter.WaitN(context.Background(), int(numMetrics))
+	if err != nil {
+		fmt.Printf("Error WaitN %s", err.Error())
+		os.Exit(1)
+	}
+
 	// Check if any of these tags has yet to be inserted
 	newTags := make([][]string, 0, len(rows))
 	p._csi.mutex.RLock()
@@ -255,11 +262,12 @@ func (p *processor) processCSI(hypertable string, rows []*insertData) uint64 {
 	return numMetrics
 }
 
-func newProcessor(opts *LoadingOptions, driver, dbName string) *processor {
+func newProcessor(opts *LoadingOptions, driver, dbName string, limiter *rate.Limiter) *processor {
 	return &processor{
-		opts:   opts,
-		driver: driver,
-		dbName: dbName,
+		opts:    opts,
+		driver:  driver,
+		dbName:  dbName,
+		limiter: limiter,
 	}
 }
 
@@ -270,6 +278,7 @@ type processor struct {
 	opts     *LoadingOptions
 	driver   string
 	dbName   string
+	limiter  *rate.Limiter
 }
 
 func (p *processor) Init(_ int, doLoad, hashWorkers bool) {

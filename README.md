@@ -49,7 +49,7 @@ go build -o benchmark ./cmd/tsbs_load
 交叉编译linux版本
 
 ```bash
-env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o benchmark_linux ./cmd/tsbs_load
+env CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o benchmark ./cmd/tsbs_load
 ```
 
 

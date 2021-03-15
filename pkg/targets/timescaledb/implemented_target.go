@@ -36,6 +36,10 @@ func (t *timescaleTarget) Benchmark(
 }
 
 func (t *timescaleTarget) TargetSpecificFlags(flagPrefix string, flagSet *pflag.FlagSet) {
+	flagSet.Bool(flagPrefix+"use-qps-limiter", false, "Use qps limiter or not.")
+	flagSet.Float64(flagPrefix+"limiter-max-qps", 5000*1000, "Limit max qps.")
+	flagSet.Int(flagPrefix+"limiter-bucket-size", 1000, "qps limiter param, default is 1000")
+
 	flagSet.String(flagPrefix+"postgres", "sslmode=disable", "PostgreSQL connection string")
 	flagSet.String(flagPrefix+"host", "localhost", "Hostname of TimescaleDB (PostgreSQL) instance")
 	flagSet.String(flagPrefix+"port", "5432", "Which port to connect to on the database host")

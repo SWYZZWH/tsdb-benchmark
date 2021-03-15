@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/timescale/tsbs/internal/inputs"
 	"github.com/timescale/tsbs/pkg/data/source"
+	"golang.org/x/time/rate"
 	"log"
 	"strings"
 	"sync"
@@ -30,6 +31,7 @@ func NewBenchmark(dsConfig *source.DataSourceConfig, v *viper.Viper) (*benchmark
 	b := new(benchmark)
 	b.dsConfig = dsConfig
 	b.init(v)
+
 	return b, nil
 }
 
@@ -65,6 +67,7 @@ type benchmark struct {
 	consistency       string
 	dsConfig          *source.DataSourceConfig
 	ds                targets.DataSource
+	limiter           *rate.Limiter
 }
 
 // Parse args:
@@ -92,6 +95,13 @@ func (b *benchmark) init(v *viper.Viper) {
 
 	b.config.HashWorkers = false
 	b.loader = load.GetBenchmarkRunner(b.config)
+
+	var limiter *rate.Limiter = nil
+	if v.GetBool("use-qps-limiter") {
+		limiter = rate.NewLimiter(rate.Limit(v.GetFloat64("limiter-max-qps")), v.GetInt("limiter-bucket-size"))
+	}
+	b.limiter = limiter
+
 }
 
 func (b *benchmark) GetDataSource() targets.DataSource {
@@ -128,8 +138,9 @@ func (b *benchmark) GetProcessor() targets.Processor {
 		loader:      b.loader,
 		consistency: b.consistency,
 		useGzip:     b.useGzip,
+		backoff:     b.backoff,
+		limiter:     b.limiter,
 		//bufPool:     &b.bufPool,
-		backoff: b.backoff,
 	}
 }
 

@@ -1,7 +1,10 @@
 package prometheus
 
 import (
+	"context"
+	"golang.org/x/time/rate"
 	"log"
+	"os"
 	"sync"
 	"time"
 
@@ -36,10 +39,17 @@ func NewBenchmark(promSpecificConfig *SpecificConfig, dataSourceConfig *source.D
 		return &Batch{}
 	}}
 
+	//new qps limiter
+	var limiter *rate.Limiter = nil
+	if promSpecificConfig.UseQpsLimiter {
+		limiter = rate.NewLimiter(rate.Limit(promSpecificConfig.LimiterMaxQps), promSpecificConfig.LimiterBucketSize)
+	}
+
 	return &Benchmark{
 		dataSource:      ds,
 		batchPool:       batchPool,
 		adapterWriteUrl: promSpecificConfig.AdapterWriteURL,
+		limiter:         limiter,
 	}, nil
 }
 
@@ -82,6 +92,7 @@ func (pd *FileDataSource) Headers() *common.GeneratedDataHeaders {
 type Processor struct {
 	client    *Client
 	batchPool *sync.Pool
+	limiter   *rate.Limiter
 }
 
 func (pp *Processor) Init(_ int, _, _ bool) {}
@@ -99,6 +110,11 @@ func (pp *Processor) ProcessBatch(b targets.Batch, doLoad bool) (uint64, uint64)
 	// reset batch
 	promBatch.series = promBatch.series[:0]
 	pp.batchPool.Put(promBatch)
+	err := pp.limiter.WaitN(context.Background(), int(nrSamples))
+	if err != nil {
+		log.Printf("Error WaitN: %s", err.Error())
+		os.Exit(1)
+	}
 	return nrSamples, nrSamples
 }
 
@@ -117,6 +133,7 @@ type Benchmark struct {
 	dataSource      targets.DataSource
 	batchPool       *sync.Pool
 	client          *Client
+	limiter         *rate.Limiter
 }
 
 func (pm *Benchmark) GetDataSource() targets.DataSource {
@@ -142,7 +159,7 @@ func (pm *Benchmark) GetProcessor() targets.Processor {
 			panic(err)
 		}
 	}
-	return &Processor{client: pm.client, batchPool: pm.batchPool}
+	return &Processor{client: pm.client, batchPool: pm.batchPool, limiter: pm.limiter}
 }
 
 func (pm *Benchmark) GetDBCreator() targets.DBCreator {
