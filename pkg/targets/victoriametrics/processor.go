@@ -2,15 +2,18 @@ package victoriametrics
 
 import (
 	"bytes"
+	"context"
 	"github.com/timescale/tsbs/pkg/targets"
+	"golang.org/x/time/rate"
 	"log"
 	"net/http"
 	"time"
 )
 
 type processor struct {
-	url    string
-	vmURLs []string
+	url     string
+	vmURLs  []string
+	limiter *rate.Limiter
 }
 
 func (p *processor) Init(workerNum int, doLoad, hashWorkers bool) {
@@ -28,6 +31,13 @@ func (p *processor) ProcessBatch(b targets.Batch, doLoad bool) (metricCount, row
 
 func (p *processor) do(b *batch) (uint64, uint64) {
 	for {
+		if p.limiter != nil {
+			err := p.limiter.WaitN(context.Background(), int(b.metrics))
+			if err != nil {
+				fatal(err.Error())
+			}
+		}
+
 		r := bytes.NewReader(b.buf.Bytes())
 		req, err := http.NewRequest("POST", p.url, r)
 		if err != nil {

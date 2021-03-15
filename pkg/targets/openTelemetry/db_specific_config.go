@@ -7,7 +7,7 @@ type SpecificConfig struct {
 	Port              string  `yaml:"port" mapstructure:"port"`
 	UseQpsLimiter     bool    `yaml:"use-qps-limiter" mapstructure:"use-qps-limiter"`
 	LimiterMaxQps     float64 `yaml:"limiter-max-qps" mapstructure:"limiter-max-qps"`
-	LimiterBucketSize int     `yaml:"limiter-bucket-size" mapstructure:"limiter-Bucket-size"`
+	LimiterBucketSize int     `yaml:"limiter-bucket-size" mapstructure:"limiter-bucket-size"`
 }
 
 func parseSpecificConfig(v *viper.Viper) (*SpecificConfig, error) {

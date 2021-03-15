@@ -36,6 +36,9 @@ func (vm vmTarget) TargetSpecificFlags(flagPrefix string, flagSet *pflag.FlagSet
 		"http://localhost:8428/write",
 		"Comma-separated list of VictoriaMetrics ingestion URLs(single-node or VMInsert)",
 	)
+	flagSet.Bool(flagPrefix+"use-qps-limiter", false, "Use qps limiter or not.")
+	flagSet.Float64(flagPrefix+"limiter-max-qps", 5000*1000, "Limit max qps.")
+	flagSet.Int(flagPrefix+"limiter-bucket-size", 1000, "qps limiter param, default is 1000")
 }
 
 func (vm vmTarget) TargetName() string {

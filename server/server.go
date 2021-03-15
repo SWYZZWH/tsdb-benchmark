@@ -37,8 +37,8 @@ const (
 var (
 	usesAvailable       = map[string]bool{"devops": true, "iot": true}
 	dataSourceAvailable = map[string]bool{"simulator": true, "file": false}
-	dbAvailable         = map[string]bool{"kmon": true, "otel": true, "influx": true, "timescale": true, "prometheus": true, "prom-pull": true}
-	sharedParams        = map[string]bool{"db": true, "ds": true, "usecase": true, "workers": true, "scale": true, "timestamp-end": true}
+	dbAvailable         = map[string]bool{"kmon": true, "otel": true, "influx": true, "timescaledb": true, "prometheus": true, "prom-pull": true, "victoriametrics": true}
+	sharedParams        = map[string]bool{"db": true, "ds": true, "use-case": true, "workers": true, "scale": true, "timestamp-end": true, "batch-size": true}
 )
 
 type DefaultConfigFile struct {
@@ -181,13 +181,13 @@ func parseStartParams(c *gin.Context, dbSpecificMap map[string]string) (map[stri
 		queryParamsMap["ds"] = ds
 	}
 
-	usecase := c.Query("usecase")
+	usecase := c.Query("use-case")
 	if usecase == "" {
 		usecase = defaultUsecase
 	} else if !usesAvailable[usecase] {
-		return nil, errors.New("double check param: usecase")
+		return nil, errors.New("double check param: use-case")
 	} else {
-		queryParamsMap["usecase"] = usecase
+		queryParamsMap["use-case"] = usecase
 	}
 
 	if workers := c.Query("workers"); workers != "" {
@@ -210,6 +210,14 @@ func parseStartParams(c *gin.Context, dbSpecificMap map[string]string) (map[stri
 		queryParamsMap["timestamp-end"] = timestampEnd
 	}
 
+	if timestampEnd := c.Query("timestamp-end"); timestampEnd != "" {
+		queryParamsMap["timestamp-end"] = timestampEnd
+	}
+
+	if batchSize := c.Query("batch-size"); batchSize != "" {
+		queryParamsMap["batch-size"] = batchSize
+	}
+
 	//without checking
 	qMap := c.Request.URL.Query()
 	for k, v := range qMap {
@@ -230,7 +238,7 @@ func overrideViperByQueryParams(v *viper.Viper, paramsMap map[string]interface{}
 	dbSpecficViper := loaderViper["db-specific"].(map[string]interface{})
 
 	// shared configs
-	if val, ok := paramsMap["usecase"]; ok {
+	if val, ok := paramsMap["use-case"]; ok {
 		simulatorViper["use-case"] = val.(string)
 	}
 	if val, ok := paramsMap["workers"]; ok {
@@ -241,6 +249,9 @@ func overrideViperByQueryParams(v *viper.Viper, paramsMap map[string]interface{}
 	}
 	if val, ok := paramsMap["timestamp-end"]; ok {
 		simulatorViper["timestamp-end"] = val.(string)
+	}
+	if val, ok := paramsMap["batch-size"]; ok {
+		runnerViper["batch-size"] = val.(string)
 	}
 
 	// db-specific configs

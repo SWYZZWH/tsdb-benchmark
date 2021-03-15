@@ -38,6 +38,7 @@ func (b *batch) Append(item data.LoadedPoint) {
 	fieldsPos := bytes.Index(that, spaceSep)
 	// seek for timestamps position in slice
 	timestampPos := bytes.Index(that[fieldsPos+1:], spaceSep) + fieldsPos
+
 	fields := that[fieldsPos+1 : timestampPos]
 	b.metrics += uint64(bytes.Count(fields, commaSep) + 1)
 

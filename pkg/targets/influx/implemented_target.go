@@ -37,7 +37,7 @@ type SpecificConfig struct {
 	gzip                bool          `yaml:"gzip" mapstructure:"gzip"`
 	use_qps_limiter     bool          `yaml:"use-qps-limiter" mapstructure:"use-qps-limiter"`
 	limiter_max_qps     float64       `yaml:"limiter-max-qps" mapstructure:"limiter-max-qps"`
-	limiter_bucket_size int           `yaml:"limiter-bucket-size" mapstructure:"limiter-Bucket-size"`
+	limiter_bucket_size int           `yaml:"limiter-bucket-size" mapstructure:"limiter-bucket-size"`
 }
 
 func (t *influxTarget) TargetName() string {
