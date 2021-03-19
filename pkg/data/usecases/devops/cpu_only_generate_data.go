@@ -58,7 +58,7 @@ func (c *CPUOnlySimulatorConfig) NewSimulator(interval time.Duration, limit uint
 		// Set specified points number limit
 		maxPoints = limit
 	}
-	fmt.Printf("total points: %d\n", maxPoints)
+	fmt.Printf("total rows: %d\n", maxPoints)
 	sim := &CPUOnlySimulator{&commonDevopsSimulator{
 		madePoints: 0,
 		maxPoints:  maxPoints,

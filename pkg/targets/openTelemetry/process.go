@@ -2,7 +2,6 @@ package open_telemetry
 
 import (
 	"context"
-	"fmt"
 	"github.com/spf13/cast"
 	"github.com/timescale/tsbs/pkg/targets"
 	"gitlab.alibaba-inc.com/monitor_service/prometheus_client_golang/prometheus/otel"
@@ -18,7 +17,6 @@ var (
 )
 
 func NewProcessor(bench *Benchmark) *processor {
-	fmt.Println("New Otel-go-client...")
 	client := otel.NewClient(
 		&otel.Config{
 			Address: bench.opts.Host,

@@ -9,6 +9,7 @@ type SpecificConfig struct {
 	UseQpsLimiter     bool    `yaml:"use-qps-limiter" mapstructure:"use-qps-limiter"`
 	LimiterMaxQps     float64 `yaml:"limiter-max-qps" mapstructure:"limiter-max-qps"`
 	LimiterBucketSize int     `yaml:"limiter-bucket-size" mapstructure:"limiter-bucket-size"`
+	IsValidationTest  bool    `yaml:"is-validation-test" mapstructure:"is-validation-test"`
 }
 
 func parseSpecificConfig(v *viper.Viper) (*SpecificConfig, error) {

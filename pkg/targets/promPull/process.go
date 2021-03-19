@@ -5,6 +5,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/timescale/tsbs/pkg/targets"
 	"golang.org/x/time/rate"
+	"math/rand"
+	"strconv"
 	"strings"
 	"sync"
 )
@@ -50,6 +52,7 @@ func (p *processor) ProcessBatch(b targets.Batch, _ bool) (uint64, uint64) {
 		for _, tagkv := range tagkvs {
 			tags = append(tags, strings.Split(tagkv, "=")[0])
 		}
+		tags = append(tags, "random")
 
 		newGauge := prometheus.NewGaugeVec(
 			prometheus.GaugeOpts{
@@ -80,6 +83,7 @@ func sendPoints(rows []*insertData, gauge *prometheus.GaugeVec) uint64 {
 
 		tagkvs := strings.Split(row.tags, ",")[1:]
 		for _, tagkv := range tagkvs {
+			tags["random"] = strconv.FormatInt(rand.Int63(), 10)
 			tags[strings.Split(tagkv, "=")[0]] = strings.Split(tagkv, "=")[1]
 		}
 

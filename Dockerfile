@@ -6,4 +6,3 @@ COPY ./ ./
 RUN go build -o ./bin/benchmark ./cmd/tsbs_load
 RUN go build -o ./bin/server ./server
 
-ENTRYPOINT ["./bin/server"]

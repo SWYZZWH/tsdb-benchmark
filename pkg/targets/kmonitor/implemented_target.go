@@ -41,4 +41,5 @@ func (t *kmonTarget) TargetSpecificFlags(flagPrefix string, flagSet *pflag.FlagS
 	flagSet.Bool(flagPrefix+"use-qps-limiter", false, "Limit max qps.")
 	flagSet.Float64(flagPrefix+"limiter-max-qps", 5000*1000, "Limit max qps.")
 	flagSet.Int(flagPrefix+"limiter-bucket-size", 1000, "qps limiter param, default is 1000")
+	flagSet.Bool(flagPrefix+"is-validation-test", false, "set true for missing point rate test")
 }

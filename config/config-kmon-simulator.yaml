@@ -19,6 +19,7 @@ loader:
     use-qps-limiter: true
     limiter-max-qps: 200000
     limiter-bucket-size: 50
+    is-validation-test: true
   runner:
     batch-size: "100"
     channel-capacity: "12"

@@ -35,7 +35,7 @@ const (
 )
 
 var (
-	usesAvailable       = map[string]bool{"devops": true, "iot": true}
+	usesAvailable       = map[string]bool{"devops": true, "iot": true, "cpu-only": true}
 	dataSourceAvailable = map[string]bool{"simulator": true, "file": false}
 	dbAvailable         = map[string]bool{"kmon": true, "otel": true, "influx": true, "timescaledb": true, "prometheus": true, "prom-pull": true, "victoriametrics": true}
 	sharedParams        = map[string]bool{"db": true, "ds": true, "use-case": true, "workers": true, "scale": true, "timestamp-end": true, "batch-size": true}
@@ -290,24 +290,28 @@ func startHandler(c *gin.Context) {
 	v := viper.New()
 	paramsMap, err := parseStartParams(c, nil)
 	if err != nil {
+		atomic.CompareAndSwapInt32(&benchmark.state, Running, Stopped)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
 	configFileName, err := getConfigFile(v, paramsMap["db"].(string), paramsMap["ds"].(string)) //config items are stored in v now
 	if err != nil {
+		atomic.CompareAndSwapInt32(&benchmark.state, Running, Stopped)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 	v.SetConfigFile(configFileName)
 	err = overrideViperByQueryParams(v, paramsMap)
 	if err != nil {
+		atomic.CompareAndSwapInt32(&benchmark.state, Running, Stopped)
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
 	err = runBenchmark(paramsMap["db"].(string), configFileName, benchmark)
 	if err != nil {
+		atomic.CompareAndSwapInt32(&benchmark.state, Running, Stopped)
 		c.JSON(http.StatusServiceUnavailable, gin.H{"error": err.Error()})
 		return
 	}
@@ -372,7 +376,23 @@ func deleteLogHandler(c *gin.Context) {
 	_ = os.Remove(defaultLogFile)
 	_, _ = os.Create(defaultLogFile)
 
-	c.JSON(http.StatusServiceUnavailable, "log has been cleaned!")
+	c.JSON(http.StatusOK, "log has been cleaned!")
+	return
+}
+
+func reportStatusHandler(c *gin.Context) {
+	b, isExist := c.Get("benchmark")
+	if !isExist {
+		c.JSON(http.StatusInternalServerError, "get global benchmark failed due to unknown reason")
+		return
+	}
+	benchmark := b.(*Benchmark)
+
+	if atomic.LoadInt32(&benchmark.state) == Running {
+		c.JSON(http.StatusOK, "running")
+	} else {
+		c.JSON(http.StatusOK, "stopped")
+	}
 	return
 }
 
@@ -396,5 +416,6 @@ func main() {
 	r.StaticFS("/files", http.Dir("./"))
 	r.StaticFile("/log.txt", defaultLogFile)
 	r.DELETE("/log", deleteLogHandler)
+	r.GET("/status", reportStatusHandler)
 	_ = r.Run(":" + strconv.Itoa(*port))
 }

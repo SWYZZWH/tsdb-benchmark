@@ -75,7 +75,7 @@ func (d *DevopsSimulatorConfig) NewSimulator(interval time.Duration, limit uint6
 		// Set specified points number limit
 		maxPoints = limit
 	}
-	fmt.Printf("total points: %d\n", maxPoints)
+	fmt.Printf("total rows: %d\n", maxPoints)
 	dg := &DevopsSimulator{
 		commonDevopsSimulator: &commonDevopsSimulator{
 			madePoints: 0,

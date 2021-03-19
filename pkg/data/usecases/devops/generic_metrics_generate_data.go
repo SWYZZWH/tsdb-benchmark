@@ -37,7 +37,7 @@ func (c *GenericMetricsSimulatorConfig) NewSimulator(interval time.Duration, lim
 	if limit > 0 && limit < maxPoints {
 		maxPoints = limit
 	}
-	fmt.Printf("total points: %d\n", maxPoints)
+	fmt.Printf("total rows: %d\n", maxPoints)
 	dg := &GenericMetricsSimulator{
 		commonDevopsSimulator: &commonDevopsSimulator{
 			madePoints: 0,
