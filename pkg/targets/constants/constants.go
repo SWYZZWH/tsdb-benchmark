@@ -13,9 +13,9 @@ const (
 	FormatPrometheus      = "prometheus"
 	FormatVictoriaMetrics = "victoriametrics"
 	FormatTimestream      = "timestream"
-	FormatKmon            = "kmon"
-	FormatOpenTelemetry   = "otel"
-	FormatPromPull        = "prom-pull"
+	//FormatKmon            = "kmon"
+	//FormatOpenTelemetry   = "otel"
+	FormatPromPull = "prom-pull"
 )
 
 func SupportedFormats() []string {
@@ -31,8 +31,8 @@ func SupportedFormats() []string {
 		FormatPrometheus,
 		FormatVictoriaMetrics,
 		FormatTimestream,
-		FormatKmon,
-		FormatOpenTelemetry,
+		//FormatKmon,
+		//FormatOpenTelemetry,
 		FormatPromPull,
 	}
 }

@@ -1,6 +1,6 @@
 module github.com/timescale/tsbs
 
-go 1.14
+go 1.16
 
 require (
 	github.com/HdrHistogram/hdrhistogram-go v1.0.0
@@ -13,6 +13,7 @@ require (
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
 	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/gocql/gocql v0.0.0-20190810123941-df4b9cc33030
+	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.4.3
 	github.com/golang/snappy v0.0.1
 	github.com/google/flatbuffers v1.11.0
@@ -25,19 +26,13 @@ require (
 	github.com/prometheus/client_golang v1.7.1
 	github.com/prometheus/common v0.15.0
 	github.com/shirou/gopsutil v2.18.12+incompatible
-	github.com/spf13/cast v1.3.0
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/pflag v1.0.5
 	github.com/spf13/viper v1.7.1
+	github.com/stretchr/testify v1.7.0 // indirect
 	github.com/timescale/promscale v0.0.0-20201006153045-6a66a36f5c84
 	github.com/transceptor-technology/go-qpack v0.0.0-20190116123619-49a14b216a45
 	github.com/valyala/fasthttp v1.15.1
-	gitlab.alibaba-inc.com/monitor_service/prometheus_client_golang v0.0.25-0.20210225044417-b5ffcf59326f
-	go.opentelemetry.io/otel v0.17.0 // indirect
-	go.opentelemetry.io/otel/exporters/otlp v0.17.0 // indirect
-	go.opentelemetry.io/otel/exporters/stdout v0.16.0 // indirect
-	go.opentelemetry.io/otel/metric v0.17.0 // indirect
-	go.opentelemetry.io/otel/sdk/metric v0.17.0 // indirect
 	go.uber.org/atomic v1.6.0
 	golang.org/x/net v0.0.0-20201021035429-f5854403a974
 	golang.org/x/time v0.0.0-20200630173020-3af7569d3a1e
