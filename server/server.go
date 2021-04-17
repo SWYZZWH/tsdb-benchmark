@@ -277,13 +277,13 @@ func startHandler(c *gin.Context) {
 
 	b, isExist := c.Get("benchmark")
 	if !isExist {
-		c.JSON(http.StatusInternalServerError, "get global benchmark failed due to unknown reason")
+		c.String(http.StatusInternalServerError, "get global benchmark failed due to unknown reason")
 		return
 	}
 	benchmark := b.(*Benchmark)
 
 	if !atomic.CompareAndSwapInt32(&benchmark.state, Stopped, Running) { // carry out only one benchmark at the same time
-		c.JSON(http.StatusServiceUnavailable, "another benchmark is running, use /stop api to shutdown first")
+		c.String(http.StatusServiceUnavailable, "another benchmark is running, use /stop api to shutdown first")
 		return
 	}
 
@@ -316,19 +316,19 @@ func startHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, "benchmark is running successfully, check running stats on grafana or use /result api")
+	c.String(http.StatusOK, "benchmark is running successfully, check running stats on grafana or use /result api")
 }
 
 func stopHandler(c *gin.Context) {
 	errInfo := ""
 	b, isExist := c.Get("benchmark")
 	if !isExist {
-		c.JSON(http.StatusInternalServerError, "get global benchmark failed due to unknown reason")
+		c.String(http.StatusInternalServerError, "get global benchmark failed due to unknown reason")
 		return
 	}
 	benchmark := b.(*Benchmark)
 	if benchmark == nil {
-		c.JSON(http.StatusInternalServerError, "get global benchmark failed due to unknown reason")
+		c.String(http.StatusInternalServerError, "get global benchmark failed due to unknown reason")
 		return
 	}
 
@@ -338,18 +338,18 @@ func stopHandler(c *gin.Context) {
 	}
 
 	if benchmark.state == Stopped {
-		c.JSON(http.StatusOK, errInfo+"benchmark is stopped now, use /start api to run new benchmark")
+		c.String(http.StatusOK, errInfo+"benchmark is stopped now, use /start api to run new benchmark")
 		return
 	}
 
 	err = benchmark.cmd.Process.Kill()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, errInfo+"benchmark shutdown has failed, please shutdown manually;")
+		c.String(http.StatusInternalServerError, errInfo+"benchmark shutdown has failed, please shutdown manually;")
 		return
 	}
 
 	atomic.CompareAndSwapInt32(&benchmark.state, Running, Stopped) //if failed, means already stopped
-	c.JSON(http.StatusOK, "benchmark has been shutdown successfully")
+	c.String(http.StatusOK, "benchmark has been shutdown successfully")
 }
 
 func GetBenchmark(benchmark *Benchmark) gin.HandlerFunc {
@@ -362,13 +362,13 @@ func GetBenchmark(benchmark *Benchmark) gin.HandlerFunc {
 func deleteLogHandler(c *gin.Context) {
 	b, isExist := c.Get("benchmark")
 	if !isExist {
-		c.JSON(http.StatusInternalServerError, "get global benchmark failed due to unknown reason")
+		c.String(http.StatusInternalServerError, "get global benchmark failed due to unknown reason")
 		return
 	}
 	benchmark := b.(*Benchmark)
 
 	if benchmark.state == Running {
-		c.JSON(http.StatusServiceUnavailable, "benchmark is running, use /stop api to shutdown first")
+		c.String(http.StatusServiceUnavailable, "benchmark is running, use /stop api to shutdown first")
 		return
 	}
 
@@ -376,22 +376,22 @@ func deleteLogHandler(c *gin.Context) {
 	_ = os.Remove(defaultLogFile)
 	_, _ = os.Create(defaultLogFile)
 
-	c.JSON(http.StatusOK, "log has been cleaned!")
+	c.String(http.StatusOK, "log has been cleaned!")
 	return
 }
 
 func reportStatusHandler(c *gin.Context) {
 	b, isExist := c.Get("benchmark")
 	if !isExist {
-		c.JSON(http.StatusInternalServerError, "get global benchmark failed due to unknown reason")
+		c.String(http.StatusInternalServerError, "get global benchmark failed due to unknown reason")
 		return
 	}
 	benchmark := b.(*Benchmark)
 
 	if atomic.LoadInt32(&benchmark.state) == Running {
-		c.JSON(http.StatusOK, "running")
+		c.String(http.StatusOK, "running")
 	} else {
-		c.JSON(http.StatusOK, "stopped")
+		c.String(http.StatusOK, "stopped")
 	}
 	return
 }

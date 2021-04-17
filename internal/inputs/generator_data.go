@@ -135,10 +135,10 @@ func (g *DataGenerator) getSerializer(sim common.Simulator, target targets.Imple
 		fallthrough
 	case constants.FormatTimescaleDB:
 		g.writeHeader(sim.Headers())
-	case constants.FormatKmon:
-		g.writeHeader(sim.Headers())
-	case constants.FormatOpenTelemetry:
-		g.writeHeader(sim.Headers())
+	//case constants.FormatKmon:
+	//	g.writeHeader(sim.Headers())
+	//case constants.FormatOpenTelemetry:
+	//	g.writeHeader(sim.Headers())
 	case constants.FormatPromPull:
 		g.writeHeader(sim.Headers())
 	}

@@ -9,9 +9,9 @@ import (
 	"github.com/timescale/tsbs/pkg/targets/constants"
 	"github.com/timescale/tsbs/pkg/targets/crate"
 	"github.com/timescale/tsbs/pkg/targets/influx"
-	"github.com/timescale/tsbs/pkg/targets/kmonitor"
+	//"github.com/timescale/tsbs/pkg/targets/kmonitor"
 	"github.com/timescale/tsbs/pkg/targets/mongo"
-	open_telemetry "github.com/timescale/tsbs/pkg/targets/openTelemetry"
+	//open_telemetry "github.com/timescale/tsbs/pkg/targets/openTelemetry"
 	prom_pull "github.com/timescale/tsbs/pkg/targets/promPull"
 	"github.com/timescale/tsbs/pkg/targets/prometheus"
 	"github.com/timescale/tsbs/pkg/targets/siridb"
@@ -45,10 +45,6 @@ func GetTarget(format string) targets.ImplementedTarget {
 		return victoriametrics.NewTarget()
 	case constants.FormatTimestream:
 		return timestream.NewTarget()
-	case constants.FormatKmon:
-		return kmonitor.NewTarget()
-	case constants.FormatOpenTelemetry:
-		return open_telemetry.NewTarget()
 	case constants.FormatPromPull:
 		return prom_pull.NewTarget()
 	}
