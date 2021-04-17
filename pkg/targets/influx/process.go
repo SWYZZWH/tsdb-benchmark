@@ -62,9 +62,11 @@ func (p *processor) ProcessBatch(b targets.Batch, doLoad bool) (uint64, uint64) 
 		var err error
 		for {
 			// qps limiter
-			err = p.limiter.WaitN(context.Background(), int(batch.metrics))
-			if err != nil {
-				fatal("Error waitN: %s\n", err.Error())
+			if p.limiter != nil {
+				err = p.limiter.WaitN(context.Background(), int(batch.metrics))
+				if err != nil {
+					fatal("Error waitN: %s\n", err.Error())
+				}
 			}
 
 			if p.useGzip {
